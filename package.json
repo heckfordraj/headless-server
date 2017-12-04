@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC",
@@ -12,5 +12,9 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "mongoose": "^4.13.5"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "node-mocks-http": "^1.6.6"
   }
 }

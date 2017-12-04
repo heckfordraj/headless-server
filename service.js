@@ -1,109 +1,130 @@
 var mongoose = require('mongoose');
+var Collections = require('./collections.js');
+var Schema = mongoose.Schema;
+
+mongoose.Promise = global.Promise;
+new Collections;
 
 mongoose.connect('mongodb://localhost/test', {
   useMongoClient: true
 });
 
-var Schema = mongoose.Schema;
 
-var fieldSchema = mongoose.Schema({
-  name: {
-    type: String,
-    unique: true
-  }
-});
+class MongoService {
 
-var Field = mongoose.model('Field', fieldSchema);
-
-
-class MongoService{
   constructor(req, res){
     this.req = req
     this.res = res
   }
 
-  addField(name){
 
-    let self = this;
+  getCollection(req, name){
 
-    if (!name) {
-      return self.res.status(200).send('No Content');
-    }
-
-    Field.create({ name: name }, function (error, res) {
-
-      if (error) {
-
-        console.log(error);
-
-        if (error.code === 11000) {
-
-          return self.res.status(409).send('Conflict');
-
-        } else {
-
-          return self.res.status(500).send('Error');
-        }
-      }
-
-      self.res.status(201).send('Created');
-    });
-  }
-
-
-  removeField(name) {
-
-    let self = this;
-
-    if (!name) {
-      return self.res.status(404).send('Not Found');
-    }
-
-    Field.findOneAndRemove({ name: name }, function (error, res) {
-
-      if (error) {
-
-        console.log(error);
-        return self.res.status(500).send('Error');
-
-      } else if (!res) {
-
-        return self.res.status(404).send('Not Found');
-      }
-
-      self.res.status(204).send('No Content');
-    });
-  }
-
-
-  getField(name){
-
-    let self = this;
     let query = {};
 
     if (name) {
       query.name = name;
     }
 
-    Field.find(query, function(error, res) {
+    return mongoose.connection.db.listCollections(query).toArray()
+    .then((res) => {
 
-      if (error) {
+      if (res.length <= 0) {
 
-        console.log(error);
-        return self.res.status(500).send('Error');
+        return req.status(404).send('Not Found');
       }
 
       console.log(res);
+      return req.status(200).send('Fetched');
+    })
+    .catch((error) => {
 
-      if (res.length > 0) {
+      console.log(error);
+      return req.status(500).send('Error');
 
-        return self.res.status(200).send('Fetched');
+    });
+  }
+
+
+  addField(req, name){
+
+    if (!name) {
+      return req.status(200).send('No Content');
+    }
+
+    return mongoose.model('Collection').create({ name: name })
+    .then((res) => {
+
+      return req.status(201).send('Created');
+    })
+    .catch((error) => {
+
+      console.log(error);
+
+      if (error.code === 11000) {
+
+        return req.status(409).send('Conflict');
 
       } else {
 
-        return self.res.status(404).send('Not Found');
+        return req.status(500).send('Error');
       }
     });
+  }
+
+
+  removeField(req, name){
+
+    if (!name) {
+      return req.status(404).send('Not Found');
+    }
+
+    mongoose.model('Collection').findOneAndRemove({ name: name })
+    .then((res) => {
+
+      if (!res) {
+
+        return req.status(404).send('Not Found');
+      }
+
+      return req.status(204).send('No Content');
+    })
+    .catch((error) => {
+
+      console.log(error);
+      return req.status(500).send('Error');
+    });
+  }
+
+
+  getField(req, name){
+
+    let query = {};
+
+    if (name) {
+      query.name = name;
+    }
+
+    return mongoose.model('Collection').find(query)
+    .then((res) => {
+
+      if (res.length > 0) {
+
+        req.status(200).send('Fetched');
+
+      } else {
+
+        req.status(404).send('Not Found');
+      }
+
+      console.log(res);
+      return res;
+    })
+    .catch((error) => {
+
+      console.log(error);
+      return req.status(500).send('Error');
+    })
   }
 
 }

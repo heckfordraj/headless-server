@@ -7,22 +7,29 @@ const MongoService = require('./service.js');
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended : false}))
 
-app.get(['/api/get', '/api/get/:name'], function (req, res) {
+
+app.get(['/api/get/all', '/api/get/:collection'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.getField(req.params.name)
+  mongoService.getCollection(res, req.params.collection)
+})
+
+app.get(['/api/get/:collection/all', '/api/get/:collection/:field'], function (req, res) {
+  let mongoService = new MongoService(req, res)
+
+  mongoService.getField(res, req.params.field)
 })
 
 app.post(['/api/add', '/api/add/:name'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.addField(req.params.name)
+  mongoService.addField(res, req.params.name)
 })
 
 app.delete(['/api/remove', '/api/remove/:name'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.removeField(req.params.name)
+  mongoService.removeField(res, req.params.name)
 })
 
 app.get('/', (req, res) => res.send('Hello World!'));
