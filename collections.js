@@ -7,6 +7,7 @@ class Collections {
     var collectionSchema = mongoose.Schema({
       name: {
         type: String,
+        required: true,
         unique: true
       }
     });

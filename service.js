@@ -49,7 +49,7 @@ class MongoService {
   addField(req, name){
 
     if (!name) {
-      return req.status(200).send('No Content');
+      return Promise.resolve(req.status(200).send('No Content'));
     }
 
     return mongoose.model('Collection').create({ name: name })
@@ -59,14 +59,13 @@ class MongoService {
     })
     .catch((error) => {
 
-      console.log(error);
-
       if (error.code === 11000) {
 
         return req.status(409).send('Conflict');
 
       } else {
 
+        console.log(error);
         return req.status(500).send('Error');
       }
     });
@@ -76,7 +75,7 @@ class MongoService {
   removeField(req, name){
 
     if (!name) {
-      return req.status(404).send('Not Found');
+      return Promise.resolve(req.status(404).send('Not Found'));
     }
 
     mongoose.model('Collection').findOneAndRemove({ name: name })
