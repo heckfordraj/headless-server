@@ -5,7 +5,7 @@ const expect = chai.expect;
 const httpMocks = require('node-mocks-http');
 const randomstring = require('randomstring').generate(5);
 
-const MongoService = require('./service.js');
+const MongoService = require('../service.js');
 const req = httpMocks.createResponse();
 
 
