@@ -25,20 +25,20 @@ describe('Server', () => {
     })
     .catch((err) => {
 
-      done(new Error("Failed to connect to MongoDB"));
+      done(new Error('Failed to connect to MongoDB'));
     });
   });
 
 
   describe('should', () => {
 
-    it("connect to MongoDB", () => {
+    it('connect to MongoDB', () => {
 
       let connectionStatus = mongoose.connection.readyState;
       expect(connectionStatus).to.equal(1);
     });
 
-    it("connect to empty db", () => {
+    it('connect to empty db', () => {
 
       return mongoose.model('Collection').count()
       .then((res) => {
@@ -49,11 +49,46 @@ describe('Server', () => {
 
   });
 
+
+  describe('getCollection', () => {
+
+    describe('should', () => {
+
+      it('get collection', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.getCollection(req, 'collections')
+        .then((res) => {
+
+          expect(req.statusCode).to.equal(200);
+          expect(res[0].name).to.equal('collections');
+        });
+      });
+
+      it('get all collections');
+
+      it('reject nonexistent collection', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.getCollection(req, 'null')
+        .then((res) => {
+          expect(req.statusCode).to.equal(404);
+          expect(res).to.be.an('array').that.is.empty;
+        });
+      });
+
+    });
+
+  });
+
+
   describe('addField', () => {
 
     describe('should', () => {
 
-      it("add field", () => {
+      it('add field', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -64,7 +99,7 @@ describe('Server', () => {
         });
       });
 
-      it("add field to database", () => {
+      it('add field to database', () => {
 
         return mongoose.model('Collection').count()
         .then((res) => {
@@ -73,7 +108,7 @@ describe('Server', () => {
         })
       });
 
-      it("reject duplicate name", () => {
+      it('reject duplicate name', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -89,7 +124,7 @@ describe('Server', () => {
 
     describe('should not', () => {
 
-      it("accept empty name", () => {
+      it('accept empty name', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -101,6 +136,7 @@ describe('Server', () => {
       });
 
     });
+
 
     after(() => {
 
@@ -120,7 +156,7 @@ describe('Server', () => {
 
     describe('should', () => {
 
-      it("remove field", () => {
+      it('remove field', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -131,7 +167,7 @@ describe('Server', () => {
         });
       });
 
-      it("remove field from database", () => {
+      it('remove field from database', () => {
 
         return mongoose.model('Collection').count()
         .then((res) => {
@@ -140,7 +176,7 @@ describe('Server', () => {
         })
       });
 
-      it("reject nonexistent field", () => {
+      it('reject nonexistent field', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -156,7 +192,7 @@ describe('Server', () => {
 
     describe('should not', () => {
 
-      it("accept empty name", () => {
+      it('accept empty name', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -182,7 +218,7 @@ describe('Server', () => {
 
     describe('should', () => {
 
-      it("get field", () => {
+      it('get field', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -194,7 +230,7 @@ describe('Server', () => {
         });
       });
 
-      it("get all fields", () => {
+      it('get all fields', () => {
 
         mongoService = new MongoService(null, null);
 
@@ -206,19 +242,15 @@ describe('Server', () => {
         });
       });
 
-    });
-
-
-    describe('should not', () => {
-
-      it("get nonexistent field", () => {
+      it('reject nonexistent field', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getField(req, 'name3')
+        return mongoService.getField(req, 'null')
         .then((res) => {
 
           expect(req.statusCode).to.equal(404);
+          expect(res).to.be.an('array').that.is.empty;
         });
       });
 

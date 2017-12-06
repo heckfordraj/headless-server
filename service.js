@@ -31,17 +31,19 @@ class MongoService {
 
       if (res.length <= 0) {
 
-        return req.status(404).send('Not Found');
+        req.status(404).send('Not Found');
+
+      } else {
+
+        req.status(200).send('Fetched');
       }
 
-      console.log(res);
-      return req.status(200).send('Fetched');
+      return res;
     })
     .catch((error) => {
 
       console.log(error);
       return req.status(500).send('Error');
-
     });
   }
 
