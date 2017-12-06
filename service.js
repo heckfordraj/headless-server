@@ -78,7 +78,7 @@ class MongoService {
       return Promise.resolve(req.status(404).send('Not Found'));
     }
 
-    mongoose.model('Collection').findOneAndRemove({ name: name })
+    return mongoose.model('Collection').findOneAndRemove({ name: name })
     .then((res) => {
 
       if (!res) {
