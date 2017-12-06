@@ -54,7 +54,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.addField(req, 'testname')
+        return mongoService.addField(req, 'testname1')
         .then(() => {
 
           expect(req.statusCode).to.equal(201);
@@ -90,7 +90,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.addField(req, 'testname')
+        return mongoService.addField(req, 'testname1')
         .then(() => {
 
           expect(req.statusCode).to.equal(409);
@@ -104,6 +104,63 @@ describe('Server', () => {
 
           expect(res).to.equal(1);
         })
+      });
+
+    });
+
+  });
+
+
+  describe('getField', () => {
+
+    before(() => {
+
+      mongoService = new MongoService(null, null);
+
+      return mongoService.addField(req, 'testname2');
+    });
+
+
+    describe('should', () => {
+
+      it("get field", () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.getField(req, 'testname1')
+        .then((res) => {
+
+          expect(req.statusCode).to.equal(200);
+          expect(res[0].name).to.equal('testname1');
+        });
+      });
+
+      it("get all fields", () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.getField(req, null)
+        .then((res) => {
+
+          expect(req.statusCode).to.equal(200);
+          expect(res).to.have.lengthOf(2);
+        });
+      });
+
+    });
+
+
+    describe('should not', () => {
+
+      it("get nonexistent field", () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.getField(req, 'testname3')
+        .then((res) => {
+
+          expect(req.statusCode).to.equal(404);
+        });
       });
 
     });

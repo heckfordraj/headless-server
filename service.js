@@ -116,7 +116,6 @@ class MongoService {
         req.status(404).send('Not Found');
       }
 
-      console.log(res);
       return res;
     })
     .catch((error) => {
