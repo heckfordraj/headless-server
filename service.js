@@ -39,11 +39,6 @@ class MongoService {
       }
 
       return res;
-    })
-    .catch((error) => {
-
-      console.log(error);
-      return req.status(500).send('Error');
     });
   }
 
@@ -65,10 +60,6 @@ class MongoService {
 
         return req.status(409).send('Conflict');
 
-      } else {
-
-        console.log(error);
-        return req.status(500).send('Error');
       }
     });
   }
@@ -89,11 +80,6 @@ class MongoService {
       }
 
       return req.status(204).send('No Content');
-    })
-    .catch((error) => {
-
-      console.log(error);
-      return req.status(500).send('Error');
     });
   }
 
@@ -119,12 +105,7 @@ class MongoService {
       }
 
       return res;
-    })
-    .catch((error) => {
-
-      console.log(error);
-      return req.status(500).send('Error');
-    })
+    });
   }
 
 }
