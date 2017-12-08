@@ -1,17 +1,20 @@
 const express = require('express');
-const bodyParser = require('body-parser')
+const cors = require('cors')
 const app = express();
 
 const MongoService = require('./service.js');
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended : false}))
+app.use(cors({ origin: 'http://localhost:4200' }));
 
 
 app.get(['/api/get/all', '/api/get/:collection'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.getCollection(res, req.params.collection)
+  return mongoService.getCollection(res, req.params.collection)
+  .then((data) => {
+    
+    res.json({ data: data });
+  });
 })
 
 app.get(['/api/get/:collection/all', '/api/get/:collection/:field'], function (req, res) {
