@@ -19,7 +19,7 @@ describe('Server', () => {
     .then((database) => {
 
       db = database;
-      mongoose.model('Collection').ensureIndexes();
+      mongoose.model('Page').ensureIndexes();
 
       done();
     })
@@ -40,7 +40,7 @@ describe('Server', () => {
 
     it('connect to empty db', () => {
 
-      return mongoose.model('Collection').count()
+      return mongoose.model('Page').count()
       .then((res) => {
 
         expect(res).to.equal(0);
@@ -58,11 +58,11 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getCollection(req, 'collections')
+        return mongoService.getCollection(req, 'pages')
         .then((res) => {
 
           expect(req.statusCode).to.equal(200);
-          expect(res[0].name).to.equal('collections');
+          expect(res[0].name).to.equal('pages');
         });
       });
 
@@ -101,7 +101,7 @@ describe('Server', () => {
 
       it('add field to database', () => {
 
-        return mongoose.model('Collection').count()
+        return mongoose.model('Page').count()
         .then((res) => {
 
           expect(res).to.equal(1);
@@ -140,7 +140,7 @@ describe('Server', () => {
 
     after(() => {
 
-      return mongoose.model('Collection').deleteOne({ name: 'name' });
+      return mongoose.model('Page').deleteOne({ name: 'name' });
     });
 
   });
@@ -150,7 +150,7 @@ describe('Server', () => {
 
     before(() => {
 
-      return mongoose.model('Collection').create({ name: 'name' });
+      return mongoose.model('Page').create({ name: 'name' });
     });
 
 
@@ -169,7 +169,7 @@ describe('Server', () => {
 
       it('remove field from database', () => {
 
-        return mongoose.model('Collection').count()
+        return mongoose.model('Page').count()
         .then((res) => {
 
           expect(res).to.equal(0);
@@ -212,7 +212,7 @@ describe('Server', () => {
 
     before(() => {
 
-      return mongoose.model('Collection').insertMany([{ name: 'name1' }, { name: 'name2' }]);
+      return mongoose.model('Page').insertMany([{ name: 'name1' }, { name: 'name2' }]);
     });
 
 
@@ -259,7 +259,7 @@ describe('Server', () => {
 
     after(() => {
 
-      return mongoose.model('Collection').deleteMany({ name: ['name1', 'name2'] });
+      return mongoose.model('Page').deleteMany({ name: ['name1', 'name2'] });
     });
 
   });

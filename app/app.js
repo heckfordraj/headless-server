@@ -7,17 +7,17 @@ const MongoService = require('./service.js');
 app.use(cors({ origin: 'http://localhost:4200' }));
 
 
-app.get(['/api/get/all', '/api/get/:collection'], function (req, res) {
+app.get('/api/get', function (req, res) {
   let mongoService = new MongoService(req, res)
 
   return mongoService.getCollection(res, req.params.collection)
   .then((data) => {
-    
+
     res.json({ data: data });
   });
 })
 
-app.get(['/api/get/:collection/all', '/api/get/:collection/:field'], function (req, res) {
+app.get(['/api/get/:collection', '/api/get/:collection/:field'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
   mongoService.getField(res, req.params.field)

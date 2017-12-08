@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 mongoose.Promise = global.Promise;
 new Collections;
 
-mongoose.connect('mongodb://localhost/test', {
+mongoose.connect('mongodb://localhost/db', {
   useMongoClient: true
 });
 
@@ -49,7 +49,7 @@ class MongoService {
       return Promise.resolve(req.status(200).send('No Content'));
     }
 
-    return mongoose.model('Collection').create({ name: name })
+    return mongoose.model('Page').create({ name: name })
     .then((res) => {
 
       return req.status(201).send('Created');
@@ -71,7 +71,7 @@ class MongoService {
       return Promise.resolve(req.status(404).send('Not Found'));
     }
 
-    return mongoose.model('Collection').findOneAndRemove({ name: name })
+    return mongoose.model('Page').findOneAndRemove({ name: name })
     .then((res) => {
 
       if (!res) {
@@ -92,7 +92,7 @@ class MongoService {
       query.name = name;
     }
 
-    return mongoose.model('Collection').find(query)
+    return mongoose.model('Page').find(query)
     .then((res) => {
 
       if (res.length > 0) {

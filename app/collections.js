@@ -4,7 +4,7 @@ class Collections {
 
   constructor() {
 
-    var collectionSchema = mongoose.Schema({
+    var pageSchema = mongoose.Schema({
       name: {
         type: String,
         required: true,
@@ -12,7 +12,7 @@ class Collections {
       }
     });
 
-    mongoose.model('Collection', collectionSchema)
+    mongoose.model('Page', pageSchema)
   }
 
 }
