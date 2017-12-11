@@ -10,17 +10,25 @@ app.use(cors({ origin: 'http://localhost:4200' }));
 app.get('/api/get', function (req, res) {
   let mongoService = new MongoService(req, res)
 
+  console.log(`getCollection: ${req.params.collection}`);
+
   return mongoService.getCollection(res, req.params.collection)
   .then((data) => {
 
-    res.json({ data: data });
+    res.json(data);
   });
 })
 
 app.get(['/api/get/:collection', '/api/get/:collection/:field'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.getField(res, req.params.field)
+  console.log(`getField: collection: ${req.params.collection} field: ${req.params.field || ''}`);
+
+  return mongoService.getField(res, req.params.field)
+  .then((data) => {
+
+    res.json(data);
+  });
 })
 
 app.post(['/api/add', '/api/add/:name'], function (req, res) {

@@ -97,11 +97,11 @@ class MongoService {
 
       if (res.length > 0) {
 
-        req.status(200).send('Fetched');
+        req.status(200);
 
       } else {
 
-        req.status(404).send('Not Found');
+        req.status(404);
       }
 
       return res;
