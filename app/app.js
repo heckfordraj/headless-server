@@ -37,7 +37,7 @@ app.post(['/api/add', '/api/add/:name'], function (req, res) {
 
   console.log(`addField: collection: page, field: ${req.body.name || ''}`);
 
-  return mongoService.addField(res, req.body)
+  return mongoService.addField(req, res, req.body)
   .then((data) => {
 
     res.json(data);

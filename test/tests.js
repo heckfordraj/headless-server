@@ -6,7 +6,8 @@ const httpMocks = require('node-mocks-http');
 const randomstring = require('randomstring').generate(5);
 
 const MongoService = require('../app/service.js');
-const req = httpMocks.createResponse();
+const res = httpMocks.createResponse();
+const req = httpMocks.createRequest();
 
 
 describe('Server', () => {
@@ -41,9 +42,9 @@ describe('Server', () => {
     it('connect to empty db', () => {
 
       return mongoose.model('Page').count()
-      .then((res) => {
+      .then((length) => {
 
-        expect(res).to.equal(0);
+        expect(length).to.equal(0);
       })
     });
 
@@ -58,11 +59,11 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getCollection(req, 'pages')
-        .then((res) => {
+        return mongoService.getCollection(res, 'pages')
+        .then((collection) => {
 
-          expect(req.statusCode).to.equal(200);
-          expect(res[0].name).to.equal('pages');
+          expect(res.statusCode).to.equal(200);
+          expect(collection[0].name).to.equal('pages');
         });
       });
 
@@ -72,10 +73,10 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getCollection(req, 'null')
-        .then((res) => {
-          expect(req.statusCode).to.equal(404);
-          expect(res).to.be.an('array').that.is.empty;
+        return mongoService.getCollection(res, 'null')
+        .then((collection) => {
+          expect(res.statusCode).to.equal(404);
+          expect(collection).to.be.an('array').that.is.empty;
         });
       });
 
@@ -94,19 +95,19 @@ describe('Server', () => {
 
         let field = { name: 'name' };
 
-        return mongoService.addField(req, field)
+        return mongoService.addField(req, res, field)
         .then(() => {
 
-          expect(req.statusCode).to.equal(201);
+          expect(res.statusCode).to.equal(201);
         });
       });
 
       it('add field to database', () => {
 
         return mongoose.model('Page').count()
-        .then((res) => {
+        .then((length) => {
 
-          expect(res).to.equal(1);
+          expect(length).to.equal(1);
         })
       });
 
@@ -116,10 +117,10 @@ describe('Server', () => {
 
         let field = { name: 'name' };
 
-        return mongoService.addField(req, field)
+        return mongoService.addField(req, res, field)
         .then(() => {
 
-          expect(req.statusCode).to.equal(409);
+          expect(res.statusCode).to.equal(409);
         });
       });
 
@@ -134,10 +135,10 @@ describe('Server', () => {
 
         let field = { name: null };
 
-        return mongoService.addField(req, field)
+        return mongoService.addField(req, res, field)
         .then(() => {
 
-          expect(req.statusCode).to.equal(200);
+          expect(res.statusCode).to.equal(200);
         });
       });
 
@@ -166,19 +167,19 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.removeField(req, 'name')
+        return mongoService.removeField(res, 'name')
         .then(() => {
 
-          expect(req.statusCode).to.equal(204);
+          expect(res.statusCode).to.equal(204);
         });
       });
 
       it('remove field from database', () => {
 
         return mongoose.model('Page').count()
-        .then((res) => {
+        .then((length) => {
 
-          expect(res).to.equal(0);
+          expect(length).to.equal(0);
         })
       });
 
@@ -186,10 +187,10 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.removeField(req, 'name1')
+        return mongoService.removeField(res, 'name1')
         .then(() => {
 
-          expect(req.statusCode).to.equal(404);
+          expect(res.statusCode).to.equal(404);
         });
       });
 
@@ -202,10 +203,10 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.removeField(req, null)
+        return mongoService.removeField(res, null)
         .then(() => {
 
-          expect(req.statusCode).to.equal(404);
+          expect(res.statusCode).to.equal(404);
         });
       });
 
@@ -228,11 +229,11 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getField(req, 'name1')
-        .then((res) => {
+        return mongoService.getField(res, 'name1')
+        .then((field) => {
 
-          expect(req.statusCode).to.equal(200);
-          expect(res[0].name).to.equal('name1');
+          expect(res.statusCode).to.equal(200);
+          expect(field[0].name).to.equal('name1');
         });
       });
 
@@ -240,11 +241,11 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getField(req, null)
-        .then((res) => {
+        return mongoService.getField(res, null)
+        .then((field) => {
 
-          expect(req.statusCode).to.equal(200);
-          expect(res).to.have.lengthOf(2);
+          expect(res.statusCode).to.equal(200);
+          expect(field).to.have.lengthOf(2);
         });
       });
 
@@ -252,11 +253,11 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getField(req, 'null')
-        .then((res) => {
+        return mongoService.getField(res, 'null')
+        .then((field) => {
 
-          expect(req.statusCode).to.equal(404);
-          expect(res).to.be.an('array').that.is.empty;
+          expect(res.statusCode).to.equal(404);
+          expect(field).to.be.an('array').that.is.empty;
         });
       });
 

@@ -18,7 +18,7 @@ class MongoService {
   }
 
 
-  getCollection(req, name){
+  getCollection(res, name){
 
     let query = {};
 
@@ -27,67 +27,69 @@ class MongoService {
     }
 
     return mongoose.connection.db.listCollections(query).toArray()
-    .then((res) => {
+    .then((collection) => {
 
-      if (res.length <= 0) {
+      if (collection.length <= 0) {
 
-        req.status(404);
+        res.status(404);
 
       } else {
 
-        req.status(200);
+        res.status(200);
       }
 
-      return res;
+      return collection;
     });
   }
 
 
-  addField(req, field){
+  addField(req, res, field){
 
     if (!field || !field.name) {
 
-      req.status(200);
+      res.status(200);
       Promise.resolve(null);
     }
 
     return mongoose.model('Page').create({ name: field.name })
-    .then((res) => {
+    .then((field) => {
 
-      req.status(201);
-      return res;
+
+      res.status(201);
+
+      return field;
     })
     .catch((error) => {
 
       if (error.code === 11000) {
 
-        req.status(409);
+        res.status(409);
         return null;
       }
     });
   }
 
 
-  removeField(req, name){
+  removeField(res, name){
 
     if (!name) {
-      return Promise.resolve(req.status(404).send('Not Found'));
+      return Promise.resolve(res.status(404).send('Not Found'));
     }
 
     return mongoose.model('Page').findOneAndRemove({ name: name })
-    .then((res) => {
+    .then((field) => {
 
-      if (!res) {
+      if (!field) {
 
-        return req.status(404).send('Not Found');
+        return res.status(404).send('Not Found');
       }
 
-      return req.status(204).send('No Content');
+      return res.status(204).send('No Content');
     });
   }
 
 
-  getField(req, name){
+  getField(res, name){
 
     let query = {};
 
@@ -96,18 +98,18 @@ class MongoService {
     }
 
     return mongoose.model('Page').find(query)
-    .then((res) => {
+    .then((field) => {
 
-      if (res.length > 0) {
+      if (field.length > 0) {
 
-        req.status(200);
+        res.status(200);
 
       } else {
 
-        req.status(404);
+        res.status(404);
       }
 
-      return res;
+      return field;
     });
   }
 
