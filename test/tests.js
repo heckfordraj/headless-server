@@ -92,7 +92,9 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.addField(req, 'name')
+        let field = { name: 'name' };
+
+        return mongoService.addField(req, field)
         .then(() => {
 
           expect(req.statusCode).to.equal(201);
@@ -112,7 +114,9 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.addField(req, 'name')
+        let field = { name: 'name' };
+
+        return mongoService.addField(req, field)
         .then(() => {
 
           expect(req.statusCode).to.equal(409);
@@ -128,7 +132,9 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.addField(req, null)
+        let field = { name: null };
+
+        return mongoService.addField(req, field)
         .then(() => {
 
           expect(req.statusCode).to.equal(200);

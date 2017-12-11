@@ -43,23 +43,26 @@ class MongoService {
   }
 
 
-  addField(req, name){
+  addField(req, field){
 
-    if (!name) {
-      return Promise.resolve(req.status(200).send('No Content'));
+    if (!field || !field.name) {
+
+      req.status(200);
+      Promise.resolve(null);
     }
 
-    return mongoose.model('Page').create({ name: name })
+    return mongoose.model('Page').create({ name: field.name })
     .then((res) => {
 
-      return req.status(201).send('Created');
+      req.status(201);
+      return res;
     })
     .catch((error) => {
 
       if (error.code === 11000) {
 
-        return req.status(409).send('Conflict');
-
+        req.status(409);
+        return null;
       }
     });
   }

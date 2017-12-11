@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors')
+const bodyParser = require('body-parser');
 const app = express();
 
 const MongoService = require('./service.js');
 
 app.use(cors({ origin: 'http://localhost:4200' }));
-
+app.use(bodyParser.json());
 
 app.get('/api/get', function (req, res) {
   let mongoService = new MongoService(req, res)
@@ -22,7 +23,7 @@ app.get('/api/get', function (req, res) {
 app.get(['/api/get/:collection', '/api/get/:collection/:field'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  console.log(`getField: collection: ${req.params.collection} field: ${req.params.field || ''}`);
+  console.log(`getField: collection: ${req.params.collection}, field: ${req.params.field || ''}`);
 
   return mongoService.getField(res, req.params.field)
   .then((data) => {
@@ -34,7 +35,13 @@ app.get(['/api/get/:collection', '/api/get/:collection/:field'], function (req, 
 app.post(['/api/add', '/api/add/:name'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.addField(res, req.params.name)
+  console.log(`addField: collection: page, field: ${req.body.name || ''}`);
+
+  return mongoService.addField(res, req.body)
+  .then((data) => {
+
+    res.json(data);
+  });
 })
 
 app.delete(['/api/remove', '/api/remove/:name'], function (req, res) {
