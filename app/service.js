@@ -48,8 +48,8 @@ class MongoService {
 
     if (!field || !field.name) {
 
-      res.status(200);
-      Promise.resolve(null);
+      res.status(403);
+      return Promise.resolve(null);
     }
 
     return mongoose.model('Page').create({ name: field.name })
@@ -73,8 +73,8 @@ class MongoService {
 
     if (!field || !field.id) {
 
-      res.status(200);
-      Promise.resolve(null);
+      res.status(403);
+      return Promise.resolve(null);
     }
 
     return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id) }, field, { new: true })

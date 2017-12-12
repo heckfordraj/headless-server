@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 mongoose.Promise = global.Promise;
 const chai = require('chai');
 const expect = chai.expect;
@@ -137,7 +138,7 @@ describe('Server', () => {
         return mongoService.addField(res, field)
         .then(() => {
 
-          expect(res.statusCode).to.equal(200);
+          expect(res.statusCode).to.equal(403);
         });
       });
 
@@ -152,17 +153,100 @@ describe('Server', () => {
   });
 
 
+  describe('updateField', () => {
+
+    let testFields;
+
+    before(() => {
+
+      return mongoose.model('Page').insertMany([{ name: 'name1' }, { name: 'name2' }])
+      .then((fields) => {
+
+        testFields = fields;
+      });
+    });
+
+    describe('should', () => {
+
+      it('update field', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateField(res, { name: 'newname', id: testFields[0].id })
+        .then(() => {
+
+          expect(res.statusCode).to.equal(200);
+        });
+      });
+
+      it('update database field', () => {
+
+        return mongoose.model('Page').findOne({ _id: ObjectId(testFields[0].id) })
+        .then((field) => {
+
+          expect(field.name).to.equal('newname');
+        });
+      });
+
+      it('reject nonexistent field', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateField(res, { name: 'name', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
+        .then(() => {
+
+          expect(res.statusCode).to.equal(404);
+        });
+      });
+
+      it('reject duplicate field', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateField(res, { name: 'newname', id: testFields[1].id })
+        .then(() => {
+
+          expect(res.statusCode).to.equal(409);
+        });
+      });
+
+    });
+
+    describe('should not', () => {
+
+      it('accept empty id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateField(res, { name: 'newname' })
+        .then(() => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+    });
+
+
+    after(() => {
+
+      return mongoose.model('Page').deleteMany({ _id: [ObjectId(testFields[0].id), ObjectId(testFields[1].id)] });
+    });
+
+  });
+
+
   describe('removeField', () => {
 
-    let nameField;
+    let testField;
 
     before(() => {
 
       return mongoose.model('Page').create({ name: 'name' })
       .then((field) => {
 
-        nameField = field;
-      })
+        testField = field;
+      });
     });
 
 
@@ -172,7 +256,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.removeField(res, nameField._id)
+        return mongoService.removeField(res, testField._id)
         .then(() => {
 
           expect(res.statusCode).to.equal(204);
