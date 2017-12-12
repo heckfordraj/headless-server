@@ -32,12 +32,24 @@ app.get(['/api/get/:collection', '/api/get/:collection/:field'], function (req, 
   });
 })
 
-app.post(['/api/add', '/api/add/:name'], function (req, res) {
+app.post('/api/add', function (req, res) {
   let mongoService = new MongoService(req, res)
 
   console.log(`addField: collection: page, field: ${req.body.name || ''}`);
 
   return mongoService.addField(res, req.body)
+  .then((data) => {
+
+    res.json(data);
+  });
+})
+
+app.put('/api/update', function (req, res) {
+  let mongoService = new MongoService(req, res)
+
+  console.log(`updateField: collection: page, field: ${req.body.name || ''}`);
+
+  return mongoService.updateField(res, req.body)
   .then((data) => {
 
     res.json(data);

@@ -69,6 +69,39 @@ class MongoService {
   }
 
 
+  updateField(res, field){
+
+    if (!field || !field.id) {
+
+      res.status(200);
+      Promise.resolve(null);
+    }
+
+    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id) }, field, { new: true })
+    .then((field) => {
+
+      if (!field) {
+
+        res.status(404);
+
+      } else {
+
+        res.status(200);
+      }
+
+      return field;
+    })
+    .catch((error) => {
+
+      if (error.code === 11000) {
+
+        res.status(409);
+        return null;
+      }
+    });
+  }
+
+
   removeField(res, id){
 
     if (!id) {
