@@ -59,7 +59,13 @@ app.put('/api/update', function (req, res) {
 app.delete(['/api/remove', '/api/remove/:id'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.removeField(res, req.params.id)
+  console.log(`removeField: collection: page, field: ${req.params.id || ''}`);
+
+  return mongoService.removeField(res, req.params.id)
+  .then((data) => {
+
+    res.json(data);
+  });
 })
 
 app.get('/', (req, res) => res.send('Hello World!'));

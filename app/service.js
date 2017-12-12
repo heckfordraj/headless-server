@@ -101,11 +101,12 @@ class MongoService {
     });
   }
 
-
+  
   removeField(res, id){
 
     if (!id) {
-      return Promise.resolve(res.status(404).send('Not Found'));
+      res.status(403);
+      return Promise.resolve(null);
     }
 
     return mongoose.model('Page').findOneAndRemove({ _id: ObjectId(id) })
@@ -113,10 +114,14 @@ class MongoService {
 
       if (!field) {
 
-        return res.status(404).send('Not Found');
+        res.status(404);
+
+      } else {
+
+        res.status(204);
       }
 
-      return res.status(204).send('No Content');
+      return field;
     });
   }
 

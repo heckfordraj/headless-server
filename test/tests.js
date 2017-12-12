@@ -295,7 +295,7 @@ describe('Server', () => {
         return mongoService.removeField(res, null)
         .then(() => {
 
-          expect(res.statusCode).to.equal(404);
+          expect(res.statusCode).to.equal(403);
         });
       });
 
