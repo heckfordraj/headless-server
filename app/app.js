@@ -37,17 +37,17 @@ app.post(['/api/add', '/api/add/:name'], function (req, res) {
 
   console.log(`addField: collection: page, field: ${req.body.name || ''}`);
 
-  return mongoService.addField(req, res, req.body)
+  return mongoService.addField(res, req.body)
   .then((data) => {
 
     res.json(data);
   });
 })
 
-app.delete(['/api/remove', '/api/remove/:name'], function (req, res) {
+app.delete(['/api/remove', '/api/remove/:id'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  mongoService.removeField(res, req.params.name)
+  mongoService.removeField(res, req.params.id)
 })
 
 app.get('/', (req, res) => res.send('Hello World!'));

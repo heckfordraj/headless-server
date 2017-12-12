@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var Collections = require('./collections.js');
 var Schema = mongoose.Schema;
+var ObjectId = mongoose.Types.ObjectId;
 
 mongoose.Promise = global.Promise;
 new Collections;
@@ -43,7 +44,7 @@ class MongoService {
   }
 
 
-  addField(req, res, field){
+  addField(res, field){
 
     if (!field || !field.name) {
 
@@ -54,9 +55,7 @@ class MongoService {
     return mongoose.model('Page').create({ name: field.name })
     .then((field) => {
 
-
       res.status(201);
-
       return field;
     })
     .catch((error) => {
@@ -70,13 +69,13 @@ class MongoService {
   }
 
 
-  removeField(res, name){
+  removeField(res, id){
 
-    if (!name) {
+    if (!id) {
       return Promise.resolve(res.status(404).send('Not Found'));
     }
 
-    return mongoose.model('Page').findOneAndRemove({ name: name })
+    return mongoose.model('Page').findOneAndRemove({ _id: ObjectId(id) })
     .then((field) => {
 
       if (!field) {

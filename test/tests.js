@@ -7,7 +7,6 @@ const randomstring = require('randomstring').generate(5);
 
 const MongoService = require('../app/service.js');
 const res = httpMocks.createResponse();
-const req = httpMocks.createRequest();
 
 
 describe('Server', () => {
@@ -95,7 +94,7 @@ describe('Server', () => {
 
         let field = { name: 'name' };
 
-        return mongoService.addField(req, res, field)
+        return mongoService.addField(res, field)
         .then(() => {
 
           expect(res.statusCode).to.equal(201);
@@ -117,7 +116,7 @@ describe('Server', () => {
 
         let field = { name: 'name' };
 
-        return mongoService.addField(req, res, field)
+        return mongoService.addField(res, field)
         .then(() => {
 
           expect(res.statusCode).to.equal(409);
@@ -135,7 +134,7 @@ describe('Server', () => {
 
         let field = { name: null };
 
-        return mongoService.addField(req, res, field)
+        return mongoService.addField(res, field)
         .then(() => {
 
           expect(res.statusCode).to.equal(200);
@@ -155,9 +154,15 @@ describe('Server', () => {
 
   describe('removeField', () => {
 
+    let nameField;
+
     before(() => {
 
-      return mongoose.model('Page').create({ name: 'name' });
+      return mongoose.model('Page').create({ name: 'name' })
+      .then((field) => {
+
+        nameField = field;
+      })
     });
 
 
@@ -167,7 +172,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.removeField(res, 'name')
+        return mongoService.removeField(res, nameField._id)
         .then(() => {
 
           expect(res.statusCode).to.equal(204);
@@ -187,7 +192,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.removeField(res, 'name1')
+        return mongoService.removeField(res, 'aaaaaaaaaaaaaaaaaaaaaaaa')
         .then(() => {
 
           expect(res.statusCode).to.equal(404);
@@ -199,7 +204,7 @@ describe('Server', () => {
 
     describe('should not', () => {
 
-      it('accept empty name', () => {
+      it('accept empty id', () => {
 
         mongoService = new MongoService(null, null);
 
