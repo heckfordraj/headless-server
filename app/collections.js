@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var slugify = require("underscore.string/slugify");
 
 class Collections {
 
@@ -8,7 +9,15 @@ class Collections {
       name: {
         type: String,
         required: true,
-        unique: true
+        trim: true
+      },
+      slug: {
+        type: String,
+        set: slugify,
+        unique: true,
+        sparse: true,
+        lowercase: true,
+        trim: true
       }
     });
 

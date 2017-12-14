@@ -35,7 +35,7 @@ app.get(['/api/get/:collection', '/api/get/:collection/:field'], function (req, 
 app.post('/api/add', function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  console.log(`addField: collection: page, field: ${req.body.name || ''}`);
+  console.log(`addField: collection: page, field name: ${req.body.name || ''}`);
 
   return mongoService.addField(res, req.body)
   .then((data) => {
@@ -47,7 +47,7 @@ app.post('/api/add', function (req, res) {
 app.put('/api/update', function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  console.log(`updateField: collection: page, field: ${req.body.name || ''}`);
+  console.log(`updateField: collection: page, field name: ${req.body.name || ''}`);
 
   return mongoService.updateField(res, req.body)
   .then((data) => {
@@ -59,7 +59,7 @@ app.put('/api/update', function (req, res) {
 app.delete(['/api/remove', '/api/remove/:id'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  console.log(`removeField: collection: page, field: ${req.params.id || ''}`);
+  console.log(`removeField: collection: page, field id: ${req.params.id || ''}`);
 
   return mongoService.removeField(res, req.params.id)
   .then((data) => {

@@ -52,7 +52,9 @@ class MongoService {
       return Promise.resolve(null);
     }
 
-    return mongoose.model('Page').create({ name: field.name })
+    field['slug'] = field.name;
+
+    return mongoose.model('Page').create(field)
     .then((field) => {
 
       res.status(201);
@@ -77,7 +79,9 @@ class MongoService {
       return Promise.resolve(null);
     }
 
-    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id) }, field, { new: true })
+    field['slug'] = field.name;
+
+    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id) }, field, { new: true, runValidators: true, runSettersOnQuery: true })
     .then((field) => {
 
       if (!field) {
@@ -101,7 +105,7 @@ class MongoService {
     });
   }
 
-  
+
   removeField(res, id){
 
     if (!id) {

@@ -93,7 +93,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        let field = { name: 'name' };
+        let field = { name: 'Title' };
 
         return mongoService.addField(res, field)
         .then(() => {
@@ -115,7 +115,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        let field = { name: 'name' };
+        let field = { name: 'Title' };
 
         return mongoService.addField(res, field)
         .then(() => {
@@ -147,7 +147,7 @@ describe('Server', () => {
 
     after(() => {
 
-      return mongoose.model('Page').deleteOne({ name: 'name' });
+      return mongoose.model('Page').deleteOne({ name: 'Title' });
     });
 
   });
@@ -159,7 +159,7 @@ describe('Server', () => {
 
     before(() => {
 
-      return mongoose.model('Page').insertMany([{ name: 'name1' }, { name: 'name2' }])
+      return mongoose.model('Page').insertMany([{ name: 'Title 1' }, { name: 'Title 2' }])
       .then((fields) => {
 
         testFields = fields;
@@ -172,7 +172,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.updateField(res, { name: 'newname', id: testFields[0].id })
+        return mongoService.updateField(res, { name: 'New Title', id: testFields[0].id })
         .then(() => {
 
           expect(res.statusCode).to.equal(200);
@@ -184,7 +184,7 @@ describe('Server', () => {
         return mongoose.model('Page').findOne({ _id: ObjectId(testFields[0].id) })
         .then((field) => {
 
-          expect(field.name).to.equal('newname');
+          expect(field.name).to.equal('New Title');
         });
       });
 
@@ -192,7 +192,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.updateField(res, { name: 'name', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
+        return mongoService.updateField(res, { name: 'Title', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
         .then(() => {
 
           expect(res.statusCode).to.equal(404);
@@ -203,7 +203,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.updateField(res, { name: 'newname', id: testFields[1].id })
+        return mongoService.updateField(res, { name: 'New Title', id: testFields[1].id })
         .then(() => {
 
           expect(res.statusCode).to.equal(409);
@@ -218,7 +218,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.updateField(res, { name: 'newname' })
+        return mongoService.updateField(res, { name: 'New Title' })
         .then(() => {
 
           expect(res.statusCode).to.equal(403);
@@ -242,7 +242,7 @@ describe('Server', () => {
 
     before(() => {
 
-      return mongoose.model('Page').create({ name: 'name' })
+      return mongoose.model('Page').create({ name: 'Title' })
       .then((field) => {
 
         testField = field;
@@ -308,7 +308,7 @@ describe('Server', () => {
 
     before(() => {
 
-      return mongoose.model('Page').insertMany([{ name: 'name1' }, { name: 'name2' }]);
+      return mongoose.model('Page').create([{ name: 'Title 1' }, { name: 'Title 2' }])
     });
 
 
@@ -318,11 +318,11 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getField(res, 'name1')
+        return mongoService.getField(res, 'Title 1')
         .then((field) => {
 
           expect(res.statusCode).to.equal(200);
-          expect(field[0].name).to.equal('name1');
+          expect(field[0].name).to.equal('Title 1');
         });
       });
 
@@ -355,7 +355,7 @@ describe('Server', () => {
 
     after(() => {
 
-      return mongoose.model('Page').deleteMany({ name: ['name1', 'name2'] });
+      return mongoose.model('Page').deleteMany({ name: ['Title 1', 'Title 2'] });
     });
 
   });
