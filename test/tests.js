@@ -124,6 +124,19 @@ describe('Server', () => {
         });
       });
 
+      it('reject similar name', () => {
+
+        mongoService = new MongoService(null, null);
+
+        let field = { name: '   tiTLe ' };
+
+        return mongoService.addField(res, field)
+        .then(() => {
+
+          expect(res.statusCode).to.equal(409);
+        });
+      });
+
     });
 
 
@@ -199,11 +212,22 @@ describe('Server', () => {
         });
       });
 
-      it('reject duplicate field', () => {
+      it('reject duplicate name', () => {
 
         mongoService = new MongoService(null, null);
 
         return mongoService.updateField(res, { name: 'New Title', id: testFields[1].id })
+        .then(() => {
+
+          expect(res.statusCode).to.equal(409);
+        });
+      });
+
+      it('reject similar name', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateField(res, { name: ' neW  tItle   ', id: testFields[1].id })
         .then(() => {
 
           expect(res.statusCode).to.equal(409);
