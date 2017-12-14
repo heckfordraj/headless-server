@@ -5,6 +5,9 @@ class Collections {
 
   constructor() {
 
+    var blockSchema = mongoose.Schema({ type: String }, { discriminatorKey: 'type' });
+    var Block = mongoose.model('Block', blockSchema)
+
     var pageSchema = mongoose.Schema({
       type: {
         type: String,
@@ -22,8 +25,23 @@ class Collections {
         sparse: true,
         lowercase: true,
         trim: true
-      }
+      },
+      data: [blockSchema]
     });
+
+    pageSchema.path('data').discriminator('text', new mongoose.Schema({
+      data: {
+        type: String,
+        required: true
+      }
+    }));
+
+    pageSchema.path('data').discriminator('image', new mongoose.Schema({
+      url: {
+        type: String,
+        required: true
+      }
+    }));
 
     mongoose.model('Page', pageSchema)
   }
