@@ -68,6 +68,18 @@ app.put('/api/update', function (req, res) {
   });
 })
 
+app.put('/api/update/field', function (req, res) {
+  let mongoService = new MongoService(req, res)
+
+  console.log(`updateSubField: collection: page, field id: ${req.body.id || ''}, subfield type: ${req.body.data.type || ''}`);
+
+  return mongoService.updateSubField(res, req.body)
+  .then((data) => {
+
+    res.json(data);
+  });
+})
+
 app.delete(['/api/remove', '/api/remove/:id'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
