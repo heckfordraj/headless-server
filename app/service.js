@@ -70,6 +70,39 @@ class MongoService {
     });
   }
 
+  addSubField(res, field){
+
+    if (!field || !field.id) {
+
+      res.status(403);
+      return Promise.resolve(null);
+    }
+
+    console.log(field);
+
+    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id) }, { $push: { data: field.data }}, { new: true, runValidators: true, runSettersOnQuery: true })
+    .then((field) => {
+
+      if (!field) {
+
+        res.status(404);
+
+      } else {
+
+        res.status(201);
+      }
+
+      return field;
+    })
+    .catch((error) => {
+
+      if (error.code === 11000) {
+
+        res.status(409);
+        return null;
+      }
+    });
+  }
 
   updateField(res, field){
 

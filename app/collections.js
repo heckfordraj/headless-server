@@ -30,17 +30,11 @@ class Collections {
     });
 
     pageSchema.path('data').discriminator('text', new mongoose.Schema({
-      data: {
-        type: String,
-        required: true
-      }
+      data: String
     }));
 
     pageSchema.path('data').discriminator('image', new mongoose.Schema({
-      url: {
-        type: String,
-        required: true
-      }
+      url: String
     }));
 
     mongoose.model('Page', pageSchema)
