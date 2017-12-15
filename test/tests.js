@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const chai = require('chai');
+const chaiSubset = require('chai-subset');
 const expect = chai.expect;
 const httpMocks = require('node-mocks-http');
 const randomstring = require('randomstring').generate(5);
@@ -8,6 +9,7 @@ const randomstring = require('randomstring').generate(5);
 const MongoService = require('../app/service.js');
 const res = httpMocks.createResponse();
 
+chai.use(chaiSubset);
 
 describe('Server', () => {
 
@@ -138,6 +140,108 @@ describe('Server', () => {
         .then(() => {
 
           expect(res.statusCode).to.equal(403);
+        });
+      });
+
+    });
+
+
+    after(() => {
+
+      return mongoose.model('Page').deleteOne({ name: 'Title' });
+    });
+
+  });
+
+
+  describe('addSubField', () => {
+
+    let testField;
+
+    before(() => {
+
+      return mongoose.model('Page').create({ name: 'Title' })
+      .then((field) => {
+
+        testField = field;
+      });
+    });
+
+
+    describe('should', () => {
+
+      it('add text subfield', () => {
+
+        mongoService = new MongoService(null, null);
+
+        let field = { id: testField.id, data: { 'type': 'text', data: 'Hello' } };
+
+        return mongoService.addSubField(res, field)
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(201);
+          expect(field.data).to.containSubset([{ _id: String }]);
+          expect(field.data).to.containSubset([{ data: 'Hello' }]);
+        });
+      });
+
+      it('add image subfield', () => {
+
+        mongoService = new MongoService(null, null);
+
+        let field = { id: testField.id, data: { 'type': 'image', url: 'http://localhost/img/1.jpg' } };
+
+        return mongoService.addSubField(res, field)
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(201);
+          expect(field.data).to.containSubset([{ _id: String }]);
+          expect(field.data).to.containSubset([{ url: 'http://localhost/img/1.jpg' }]);
+        });
+      });
+
+    });
+
+
+    describe('should not', () => {
+
+      it('accept empty field id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        let field = { id: null, data: { 'type': 'text', data: 'Hello' } };
+
+        return mongoService.addSubField(res, field)
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+      it('accept empty field data', () => {
+
+        mongoService = new MongoService(null, null);
+
+        let field = { id: testField.id, data: null };
+
+        return mongoService.addSubField(res, field)
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+      it('should not overwrite subfield', () => {
+
+        mongoService = new MongoService(null, null);
+
+        let field = { id: testField.id, data: { 'type': 'text', data: 'Hi' } };
+
+        return mongoService.addSubField(res, field)
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(201);
+          expect(field.data).to.be.an('array').to.have.lengthOf(3);
         });
       });
 

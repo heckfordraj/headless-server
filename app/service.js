@@ -66,7 +66,7 @@ class MongoService {
 
   addSubField(res, field){
 
-    if (!field || !field.id) {
+    if (!field || !field.id || !field.data) {
 
       res.status(403);
       return Promise.resolve(null);
@@ -85,14 +85,6 @@ class MongoService {
       }
 
       return field;
-    })
-    .catch((error) => {
-
-      if (error.code === 11000) {
-
-        res.status(409);
-        return null;
-      }
     });
   }
 
@@ -152,14 +144,6 @@ class MongoService {
       }
 
       return field;
-    })
-    .catch((error) => {
-
-      if (error.code === 11000) {
-
-        res.status(409);
-        return null;
-      }
     });
   }
 
