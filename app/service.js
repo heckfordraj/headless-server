@@ -19,18 +19,12 @@ class MongoService {
   }
 
 
-  getCollection(res, name){
+  getCollections(res){
 
-    let query = {};
+    return mongoose.connection.db.listCollections().toArray()
+    .then((collections) => {
 
-    if (name) {
-      query.name = name;
-    }
-
-    return mongoose.connection.db.listCollections(query).toArray()
-    .then((collection) => {
-
-      if (collection.length <= 0) {
+      if (collections.length <= 0) {
 
         res.status(404);
 
@@ -39,7 +33,7 @@ class MongoService {
         res.status(200);
       }
 
-      return collection;
+      return collections;
     });
   }
 
@@ -219,24 +213,24 @@ class MongoService {
   }
 
 
-  getField(res, name){
+  getField(res, id){
 
     let query = {};
 
-    if (name) {
-      query.name = name;
+    if (id) {
+      query._id = ObjectId(id)
     }
 
     return mongoose.model('Page').find(query)
     .then((field) => {
 
-      if (field.length > 0) {
+      if (!field || field.length <= 0) {
 
-        res.status(200);
+        res.status(404);
 
       } else {
 
-        res.status(404);
+        res.status(200);
       }
 
       return field;

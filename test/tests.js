@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 mongoose.Promise = global.Promise;
 const chai = require('chai');
 const expect = chai.expect;
@@ -51,32 +50,19 @@ describe('Server', () => {
   });
 
 
-  describe('getCollection', () => {
+  describe('getCollections', () => {
 
     describe('should', () => {
 
-      it('get collection', () => {
+      it('get all collections', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getCollection(res, 'pages')
-        .then((collection) => {
+        return mongoService.getCollections(res)
+        .then((collections) => {
 
           expect(res.statusCode).to.equal(200);
-          expect(collection[0].name).to.equal('pages');
-        });
-      });
-
-      it('get all collections');
-
-      it('reject nonexistent collection', () => {
-
-        mongoService = new MongoService(null, null);
-
-        return mongoService.getCollection(res, 'null')
-        .then((collection) => {
-          expect(res.statusCode).to.equal(404);
-          expect(collection).to.be.an('array').that.is.empty;
+          expect(collections).to.be.an('array').to.have.lengthOf.at.least(1);
         });
       });
 
@@ -194,7 +180,7 @@ describe('Server', () => {
 
       it('update database field', () => {
 
-        return mongoose.model('Page').findOne({ _id: ObjectId(testFields[0].id) })
+        return mongoose.model('Page').findById(testFields[0].id)
         .then((field) => {
 
           expect(field.name).to.equal('New Title');
@@ -254,7 +240,7 @@ describe('Server', () => {
 
     after(() => {
 
-      return mongoose.model('Page').deleteMany({ _id: [ObjectId(testFields[0].id), ObjectId(testFields[1].id)] });
+      return mongoose.model('Page').deleteMany({ _id: { $in: [testFields[0].id, testFields[1].id] } });
     });
 
   });
@@ -330,9 +316,15 @@ describe('Server', () => {
 
   describe('getField', () => {
 
+    let testFields;
+
     before(() => {
 
       return mongoose.model('Page').create([{ name: 'Title 1' }, { name: 'Title 2' }])
+      .then((fields) => {
+
+        testFields = fields;
+      });
     });
 
 
@@ -342,7 +334,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getField(res, 'Title 1')
+        return mongoService.getField(res, testFields[0]._id)
         .then((field) => {
 
           expect(res.statusCode).to.equal(200);
@@ -355,10 +347,10 @@ describe('Server', () => {
         mongoService = new MongoService(null, null);
 
         return mongoService.getField(res, null)
-        .then((field) => {
+        .then((fields) => {
 
           expect(res.statusCode).to.equal(200);
-          expect(field).to.have.lengthOf(2);
+          expect(fields).to.have.lengthOf(2);
         });
       });
 
@@ -366,7 +358,7 @@ describe('Server', () => {
 
         mongoService = new MongoService(null, null);
 
-        return mongoService.getField(res, 'null')
+        return mongoService.getField(res, 'aaaaaaaaaaaaaaaaaaaaaaaa')
         .then((field) => {
 
           expect(res.statusCode).to.equal(404);
@@ -379,7 +371,7 @@ describe('Server', () => {
 
     after(() => {
 
-      return mongoose.model('Page').deleteMany({ name: ['Title 1', 'Title 2'] });
+      return mongoose.model('Page').deleteMany({ _id: { $in: [testFields[0].id, testFields[1].id] } });
     });
 
   });

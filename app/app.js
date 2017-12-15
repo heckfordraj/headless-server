@@ -20,12 +20,12 @@ app.get('/api/get', function (req, res) {
   });
 })
 
-app.get(['/api/get/:collection', '/api/get/:collection/:field'], function (req, res) {
+app.get(['/api/get/:collection', '/api/get/:collection/:id'], function (req, res) {
   let mongoService = new MongoService(req, res)
 
-  console.log(`getField: collection: ${req.params.collection}, field: ${req.params.field || ''}`);
+  console.log(`getField: collection: ${req.params.collection}, field id: ${req.params.id || ''}`);
 
-  return mongoService.getField(res, req.params.field)
+  return mongoService.getField(res, req.params.id)
   .then((data) => {
 
     res.json(data);
