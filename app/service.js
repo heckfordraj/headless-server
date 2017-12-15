@@ -78,9 +78,7 @@ class MongoService {
       return Promise.resolve(null);
     }
 
-    console.log(field);
-
-    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id) }, { $push: { data: field.data }}, { new: true, runValidators: true, runSettersOnQuery: true })
+    return mongoose.model('Page').findByIdAndUpdate(field.id, { $push: { data: field.data }}, { new: true, runValidators: true, runSettersOnQuery: true })
     .then((field) => {
 
       if (!field) {
@@ -114,7 +112,7 @@ class MongoService {
 
     field['slug'] = field.name;
 
-    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id) }, field, { new: true, runValidators: true, runSettersOnQuery: true })
+    return mongoose.model('Page').findByIdAndUpdate(field.id, field, { new: true, runValidators: true, runSettersOnQuery: true })
     .then((field) => {
 
       if (!field) {
@@ -146,8 +144,6 @@ class MongoService {
       res.status(403);
       return Promise.resolve(null);
     }
-
-    console.log(field);
 
     return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(field.id), "data._id": ObjectId(field.data.id) }, { "$set": { "data.$": field.data } }, { new: true, runValidators: true, runSettersOnQuery: true })
     .then((field) => {
@@ -181,7 +177,7 @@ class MongoService {
       return Promise.resolve(null);
     }
 
-    return mongoose.model('Page').findOneAndRemove({ _id: ObjectId(id) })
+    return mongoose.model('Page').findByIdAndRemove(id)
     .then((field) => {
 
       if (!field) {
@@ -206,7 +202,7 @@ class MongoService {
       return Promise.resolve(null);
     }
 
-    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(id) }, { "$pull": { "data": {"_id": ObjectId(subid)} } })
+    return mongoose.model('Page').findByIdAndUpdate(id, { "$pull": { "data": { "_id": ObjectId(subid) } } })
     .then((field) => {
 
       if (!field) {
