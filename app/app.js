@@ -92,6 +92,18 @@ app.delete(['/api/remove', '/api/remove/:id'], function (req, res) {
   });
 })
 
+app.delete('/api/remove/:id/:subid', function (req, res) {
+  let mongoService = new MongoService(req, res)
+
+  console.log(`removeSubField: collection: page, field id: ${req.params.id || ''}, subfield id: ${req.params.subid || ''}`);
+
+  return mongoService.removeSubField(res, req.params.id, req.params.subid)
+  .then((data) => {
+
+    res.json(data);
+  });
+})
+
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.listen(4100, () => console.log('Example app listening on port 4100!'));

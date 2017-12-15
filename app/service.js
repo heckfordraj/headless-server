@@ -198,6 +198,31 @@ class MongoService {
   }
 
 
+  removeSubField(res, id, subid){
+
+    if (!id || !subid) {
+
+      res.status(403);
+      return Promise.resolve(null);
+    }
+
+    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(id) }, { "$pull": { "data": {"_id": ObjectId(subid)} } })
+    .then((field) => {
+
+      if (!field) {
+
+        res.status(404);
+
+      } else {
+
+        res.status(204);
+      }
+
+      return field;
+    });
+  }
+
+
   getField(res, name){
 
     let query = {};
