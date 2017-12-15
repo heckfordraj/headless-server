@@ -125,7 +125,7 @@ class MongoService {
 
   updateSubField(res, field){
 
-    if (!field || !field.id) {
+    if (!field || !field.id || !field.data || !field.data.type || !field.data.id) {
 
       res.status(403);
       return Promise.resolve(null);

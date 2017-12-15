@@ -200,6 +200,19 @@ describe('Server', () => {
         });
       });
 
+      it('reject nonexistent field', () => {
+
+        mongoService = new MongoService(null, null);
+
+        let field = { id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { 'type': 'text', data: 'Hello' } };
+
+        return mongoService.addSubField(res, field)
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(404);
+        });
+      });
+
     });
 
 
@@ -345,6 +358,125 @@ describe('Server', () => {
     after(() => {
 
       return mongoose.model('Page').deleteMany({ _id: { $in: [testFields[0].id, testFields[1].id] } });
+    });
+
+  });
+
+
+  describe('updateSubField', () => {
+
+    let testField;
+
+    before(() => {
+
+      return mongoose.model('Page').create({ name: 'Title', data: { type: 'text', data: 'Hello' } })
+      .then((field) => {
+
+        testField = field;
+      });
+    });
+
+
+    describe('should', () => {
+
+      it('update subfield', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateSubField(res, { id: testField.id, data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hi' } })
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(200);
+          expect(field.data[0].data).to.equal('Hi');
+        });
+      });
+
+      it('update database subfield', () => {
+
+        return mongoose.model('Page').findById(testField.id)
+        .then((field) => {
+
+          expect(field.data[0].data).to.equal('Hi');
+        });
+      });
+
+      it('reject nonexistent field', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateSubField(res, { id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(404);
+        });
+      });
+
+      it('reject nonexistent subfield', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateSubField(res, { id: testField.id, data: { type: testField.data[0].type, id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: 'Hi' } })
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(404);
+        });
+      });
+
+    });
+
+
+    describe('should not', () => {
+
+      it('accept empty id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateSubField(res, { data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+      it('accept empty data', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateSubField(res, { id: testField.id, data: null })
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+      it('accept empty data type', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateSubField(res, { id: testField.id, data: { id: testField.data[0].id, data: 'Hello' } })
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+      it('accept empty data id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.updateSubField(res, { id: testField.id, data: { type: testField.data[0].type, data: 'Hello' } })
+        .then((field) => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+    });
+
+
+    after(() => {
+
+      return mongoose.model('Page').deleteOne({ name: 'Title' });
     });
 
   });
