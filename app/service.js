@@ -180,7 +180,7 @@ class MongoService {
       return Promise.resolve(null);
     }
 
-    return mongoose.model('Page').findByIdAndUpdate(id, { "$pull": { "data": { "_id": ObjectId(subid) } } })
+    return mongoose.model('Page').findOneAndUpdate({ _id: ObjectId(id), "data._id": ObjectId(subid) }, { "$pull": { "data": { "_id": ObjectId(subid) } } }, { new: true })
     .then((field) => {
 
       if (!field) {

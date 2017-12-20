@@ -550,6 +550,111 @@ describe('Server', () => {
   });
 
 
+  describe('removeSubField', () => {
+
+    let testField;
+
+    before(() => {
+
+      return mongoose.model('Page').create({ name: 'Title', data: [{ type: 'text', data: 'Hello' }, { type: 'text', data: 'Hello' }] })
+      .then((field) => {
+
+        testField = field;
+      });
+    });
+
+
+    describe('should', () => {
+
+      it('remove subfield', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.removeSubField(res, testField.id, testField.data[0].id)
+        .then(() => {
+
+          expect(res.statusCode).to.equal(204);
+        });
+      });
+
+      it('reject nonexistent id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.removeSubField(res, 'aaaaaaaaaaaaaaaaaaaaaaaa', testField.data[0].id)
+        .then(() => {
+
+          expect(res.statusCode).to.equal(404);
+        });
+      });
+
+      it('reject nonexistent data id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.removeSubField(res, testField.id, 'aaaaaaaaaaaaaaaaaaaaaaaa')
+        .then(() => {
+
+          expect(res.statusCode).to.equal(404);
+        });
+      });
+
+    });
+
+
+    describe('should not', () => {
+
+      it('accept empty id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.removeSubField(res, null, testField.data[0].id)
+        .then(() => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+      it('accept empty data id', () => {
+
+        mongoService = new MongoService(null, null);
+
+        return mongoService.removeSubField(res, testField.id, null)
+        .then(() => {
+
+          expect(res.statusCode).to.equal(403);
+        });
+      });
+
+      it('remove field', () => {
+
+        return mongoose.model('Page').findById(testField.id)
+        .then((field) => {
+
+          expect(field).to.not.be.null;
+        });
+      });
+
+      it('remove duplicate subfield', () => {
+
+        return mongoose.model('Page').findById(testField.id)
+        .then((field) => {
+
+          expect(field.data).to.be.an('array').to.have.lengthOf(1);
+        });
+      });
+
+    });
+
+
+    after(() => {
+
+      return mongoose.model('Page').deleteOne({ name: 'Title' });
+    });
+
+  });
+
+
   describe('getField', () => {
 
     let testFields;
