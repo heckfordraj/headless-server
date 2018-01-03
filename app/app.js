@@ -4,9 +4,23 @@ const bodyParser = require('body-parser');
 const app = express();
 
 const MongoService = require('./service.js');
+const UploadService = require('./upload.js');
 
 app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(bodyParser.json());
+
+
+app.post('/upload', function (req, res) {
+
+  console.log('uploadImage' + req.file);
+
+  let uploadService = new UploadService(req, res);
+  return uploadService.uploadImage()
+  .then((data) => {
+
+    res.json(data);
+  });
+})
 
 app.get('/api/get', function (req, res) {
   let mongoService = new MongoService(req, res)
@@ -104,6 +118,4 @@ app.delete('/api/remove/:id/:subid', function (req, res) {
   });
 })
 
-app.get('/', (req, res) => res.send('Hello World!'));
-
-app.listen(4100, () => console.log('Example app listening on port 4100!'));
+app.listen(4100, () => console.log('Server listening on port 4100'));
