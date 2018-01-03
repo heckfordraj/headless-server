@@ -58,9 +58,9 @@ describe('Server', () => {
 
       it('get all collections', () => {
 
-        mongoService = new MongoService(null, null);
+        let mongoService = new MongoService(res);
 
-        return mongoService.getCollections(res)
+        return mongoService.getCollections()
         .then((collections) => {
 
           expect(res.statusCode).to.equal(200);
@@ -79,11 +79,10 @@ describe('Server', () => {
 
       it('add field', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { name: 'Title' };
 
-        return mongoService.addField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addField(field)
         .then(() => {
 
           expect(res.statusCode).to.equal(201);
@@ -101,11 +100,10 @@ describe('Server', () => {
 
       it('reject duplicate name', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { name: 'Title' };
 
-        return mongoService.addField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addField(field)
         .then(() => {
 
           expect(res.statusCode).to.equal(409);
@@ -114,11 +112,10 @@ describe('Server', () => {
 
       it('reject similar name', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { name: '   tiTLe ' };
 
-        return mongoService.addField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addField(field)
         .then(() => {
 
           expect(res.statusCode).to.equal(409);
@@ -132,11 +129,10 @@ describe('Server', () => {
 
       it('accept empty name', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { name: null };
 
-        return mongoService.addField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addField(field)
         .then(() => {
 
           expect(res.statusCode).to.equal(403);
@@ -172,11 +168,10 @@ describe('Server', () => {
 
       it('add text subfield', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { id: testField.id, data: { 'type': 'text', data: 'Hello' } };
 
-        return mongoService.addSubField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addSubField(field)
         .then((field) => {
 
           expect(res.statusCode).to.equal(201);
@@ -187,11 +182,10 @@ describe('Server', () => {
 
       it('add image subfield', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { id: testField.id, data: { 'type': 'image', url: 'http://localhost/img/1.jpg' } };
 
-        return mongoService.addSubField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addSubField(field)
         .then((field) => {
 
           expect(res.statusCode).to.equal(201);
@@ -202,11 +196,10 @@ describe('Server', () => {
 
       it('reject nonexistent field', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { 'type': 'text', data: 'Hello' } };
 
-        return mongoService.addSubField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addSubField(field)
         .then((field) => {
 
           expect(res.statusCode).to.equal(404);
@@ -220,11 +213,10 @@ describe('Server', () => {
 
       it('accept empty field id', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { id: null, data: { 'type': 'text', data: 'Hello' } };
 
-        return mongoService.addSubField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addSubField(field)
         .then((field) => {
 
           expect(res.statusCode).to.equal(403);
@@ -233,11 +225,10 @@ describe('Server', () => {
 
       it('accept empty field data', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { id: testField.id, data: null };
 
-        return mongoService.addSubField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addSubField(field)
         .then((field) => {
 
           expect(res.statusCode).to.equal(403);
@@ -246,11 +237,10 @@ describe('Server', () => {
 
       it('should not overwrite subfield', () => {
 
-        mongoService = new MongoService(null, null);
-
         let field = { id: testField.id, data: { 'type': 'text', data: 'Hi' } };
 
-        return mongoService.addSubField(res, field)
+        let mongoService = new MongoService(res);
+        return mongoService.addSubField(field)
         .then((field) => {
 
           expect(res.statusCode).to.equal(201);
@@ -286,9 +276,8 @@ describe('Server', () => {
 
       it('update field', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateField(res, { name: 'New Title', id: testFields[0].id })
+        let mongoService = new MongoService(res);
+        return mongoService.updateField({ name: 'New Title', id: testFields[0].id })
         .then(() => {
 
           expect(res.statusCode).to.equal(200);
@@ -306,9 +295,8 @@ describe('Server', () => {
 
       it('reject nonexistent field', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateField(res, { name: 'Title', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
+        let mongoService = new MongoService(res);
+        return mongoService.updateField({ name: 'Title', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
         .then(() => {
 
           expect(res.statusCode).to.equal(404);
@@ -317,9 +305,8 @@ describe('Server', () => {
 
       it('reject duplicate name', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateField(res, { name: 'New Title', id: testFields[1].id })
+        let mongoService = new MongoService(res);
+        return mongoService.updateField({ name: 'New Title', id: testFields[1].id })
         .then(() => {
 
           expect(res.statusCode).to.equal(409);
@@ -328,9 +315,8 @@ describe('Server', () => {
 
       it('reject similar name', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateField(res, { name: ' neW  tItle   ', id: testFields[1].id })
+        let mongoService = new MongoService(res);
+        return mongoService.updateField({ name: ' neW  tItle   ', id: testFields[1].id })
         .then(() => {
 
           expect(res.statusCode).to.equal(409);
@@ -343,9 +329,8 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateField(res, { name: 'New Title' })
+        let mongoService = new MongoService(res);
+        return mongoService.updateField({ name: 'New Title' })
         .then(() => {
 
           expect(res.statusCode).to.equal(403);
@@ -381,9 +366,8 @@ describe('Server', () => {
 
       it('update subfield', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateSubField(res, { id: testField.id, data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hi' } })
+        let mongoService = new MongoService(res);
+        return mongoService.updateSubField({ id: testField.id, data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hi' } })
         .then((field) => {
 
           expect(res.statusCode).to.equal(200);
@@ -402,9 +386,8 @@ describe('Server', () => {
 
       it('reject nonexistent field', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateSubField(res, { id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+        let mongoService = new MongoService(res);
+        return mongoService.updateSubField({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
         .then((field) => {
 
           expect(res.statusCode).to.equal(404);
@@ -413,9 +396,8 @@ describe('Server', () => {
 
       it('reject nonexistent subfield', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateSubField(res, { id: testField.id, data: { type: testField.data[0].type, id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: 'Hi' } })
+        let mongoService = new MongoService(res);
+        return mongoService.updateSubField({ id: testField.id, data: { type: testField.data[0].type, id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: 'Hi' } })
         .then((field) => {
 
           expect(res.statusCode).to.equal(404);
@@ -429,9 +411,8 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateSubField(res, { data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+        let mongoService = new MongoService(res);
+        return mongoService.updateSubField({ data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
         .then((field) => {
 
           expect(res.statusCode).to.equal(403);
@@ -440,9 +421,8 @@ describe('Server', () => {
 
       it('accept empty data', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateSubField(res, { id: testField.id, data: null })
+        let mongoService = new MongoService(res);
+        return mongoService.updateSubField({ id: testField.id, data: null })
         .then((field) => {
 
           expect(res.statusCode).to.equal(403);
@@ -451,9 +431,8 @@ describe('Server', () => {
 
       it('accept empty data type', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateSubField(res, { id: testField.id, data: { id: testField.data[0].id, data: 'Hello' } })
+        let mongoService = new MongoService(res);
+        return mongoService.updateSubField({ id: testField.id, data: { id: testField.data[0].id, data: 'Hello' } })
         .then((field) => {
 
           expect(res.statusCode).to.equal(403);
@@ -462,9 +441,8 @@ describe('Server', () => {
 
       it('accept empty data id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.updateSubField(res, { id: testField.id, data: { type: testField.data[0].type, data: 'Hello' } })
+        let mongoService = new MongoService(res);
+        return mongoService.updateSubField({ id: testField.id, data: { type: testField.data[0].type, data: 'Hello' } })
         .then((field) => {
 
           expect(res.statusCode).to.equal(403);
@@ -500,9 +478,8 @@ describe('Server', () => {
 
       it('remove field', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeField(res, testField._id)
+        let mongoService = new MongoService(res);
+        return mongoService.removeField(testField._id)
         .then(() => {
 
           expect(res.statusCode).to.equal(204);
@@ -520,9 +497,8 @@ describe('Server', () => {
 
       it('reject nonexistent field', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeField(res, 'aaaaaaaaaaaaaaaaaaaaaaaa')
+        let mongoService = new MongoService(res);
+        return mongoService.removeField('aaaaaaaaaaaaaaaaaaaaaaaa')
         .then(() => {
 
           expect(res.statusCode).to.equal(404);
@@ -536,9 +512,8 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeField(res, null)
+        let mongoService = new MongoService(res);
+        return mongoService.removeField(null)
         .then(() => {
 
           expect(res.statusCode).to.equal(403);
@@ -568,9 +543,8 @@ describe('Server', () => {
 
       it('remove subfield', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeSubField(res, testField.id, testField.data[0].id)
+        let mongoService = new MongoService(res);
+        return mongoService.removeSubField(testField.id, testField.data[0].id)
         .then(() => {
 
           expect(res.statusCode).to.equal(204);
@@ -579,9 +553,8 @@ describe('Server', () => {
 
       it('reject nonexistent id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeSubField(res, 'aaaaaaaaaaaaaaaaaaaaaaaa', testField.data[0].id)
+        let mongoService = new MongoService(res);
+        return mongoService.removeSubField('aaaaaaaaaaaaaaaaaaaaaaaa', testField.data[0].id)
         .then(() => {
 
           expect(res.statusCode).to.equal(404);
@@ -590,9 +563,8 @@ describe('Server', () => {
 
       it('reject nonexistent data id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeSubField(res, testField.id, 'aaaaaaaaaaaaaaaaaaaaaaaa')
+        let mongoService = new MongoService(res);
+        return mongoService.removeSubField(testField.id, 'aaaaaaaaaaaaaaaaaaaaaaaa')
         .then(() => {
 
           expect(res.statusCode).to.equal(404);
@@ -606,9 +578,8 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeSubField(res, null, testField.data[0].id)
+        let mongoService = new MongoService(res);
+        return mongoService.removeSubField(null, testField.data[0].id)
         .then(() => {
 
           expect(res.statusCode).to.equal(403);
@@ -617,9 +588,8 @@ describe('Server', () => {
 
       it('accept empty data id', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.removeSubField(res, testField.id, null)
+        let mongoService = new MongoService(res);
+        return mongoService.removeSubField(testField.id, null)
         .then(() => {
 
           expect(res.statusCode).to.equal(403);
@@ -673,9 +643,8 @@ describe('Server', () => {
 
       it('get field', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.getField(res, testFields[0]._id)
+        let mongoService = new MongoService(res);
+        return mongoService.getField(testFields[0]._id)
         .then((field) => {
 
           expect(res.statusCode).to.equal(200);
@@ -685,9 +654,8 @@ describe('Server', () => {
 
       it('get all fields', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.getField(res, null)
+        let mongoService = new MongoService(res);
+        return mongoService.getField(null)
         .then((fields) => {
 
           expect(res.statusCode).to.equal(200);
@@ -697,9 +665,8 @@ describe('Server', () => {
 
       it('reject nonexistent field', () => {
 
-        mongoService = new MongoService(null, null);
-
-        return mongoService.getField(res, 'aaaaaaaaaaaaaaaaaaaaaaaa')
+        let mongoService = new MongoService(res);
+        return mongoService.getField('aaaaaaaaaaaaaaaaaaaaaaaa')
         .then((field) => {
 
           expect(res.statusCode).to.equal(404);

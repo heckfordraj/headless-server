@@ -13,24 +13,23 @@ mongoose.connect('mongodb://localhost/db', {
 
 class MongoService {
 
-  constructor(req, res){
-    this.req = req
+  constructor(res){
     this.res = res
   }
 
 
-  getCollections(res){
+  getCollections(){
 
     return mongoose.connection.db.listCollections().toArray()
     .then((collections) => {
 
       if (collections.length <= 0) {
 
-        res.status(404);
+        this.res.status(404);
 
       } else {
 
-        res.status(200);
+        this.res.status(200);
       }
 
       return collections;
@@ -38,11 +37,11 @@ class MongoService {
   }
 
 
-  addField(res, field){
+  addField(field){
 
     if (!field || !field.name) {
 
-      res.status(403);
+      this.res.status(403);
       return Promise.resolve(null);
     }
 
@@ -51,24 +50,24 @@ class MongoService {
     return mongoose.model('Page').create(field)
     .then((field) => {
 
-      res.status(201);
+      this.res.status(201);
       return field;
     })
     .catch((error) => {
 
       if (error.code === 11000) {
 
-        res.status(409);
+        this.res.status(409);
         return null;
       }
     });
   }
 
-  addSubField(res, field){
+  addSubField(field){
 
     if (!field || !field.id || !field.data) {
 
-      res.status(403);
+      this.res.status(403);
       return Promise.resolve(null);
     }
 
@@ -77,22 +76,22 @@ class MongoService {
 
       if (!field) {
 
-        res.status(404);
+        this.res.status(404);
 
       } else {
 
-        res.status(201);
+        this.res.status(201);
       }
 
       return field;
     });
   }
 
-  updateField(res, field){
+  updateField(field){
 
     if (!field || !field.id) {
 
-      res.status(403);
+      this.res.status(403);
       return Promise.resolve(null);
     }
 
@@ -103,11 +102,11 @@ class MongoService {
 
       if (!field) {
 
-        res.status(404);
+        this.res.status(404);
 
       } else {
 
-        res.status(200);
+        this.res.status(200);
       }
 
       return field;
@@ -116,18 +115,18 @@ class MongoService {
 
       if (error.code === 11000) {
 
-        res.status(409);
+        this.res.status(409);
         return null;
       }
     });
   }
 
 
-  updateSubField(res, field){
+  updateSubField(field){
 
     if (!field || !field.id || !field.data || !field.data.type || !field.data.id) {
 
-      res.status(403);
+      this.res.status(403);
       return Promise.resolve(null);
     }
 
@@ -136,11 +135,11 @@ class MongoService {
 
       if (!field) {
 
-        res.status(404);
+        this.res.status(404);
 
       } else {
 
-        res.status(200);
+        this.res.status(200);
       }
 
       return field;
@@ -148,10 +147,10 @@ class MongoService {
   }
 
 
-  removeField(res, id){
+  removeField(id){
 
     if (!id) {
-      res.status(403);
+      this.res.status(403);
       return Promise.resolve(null);
     }
 
@@ -160,11 +159,11 @@ class MongoService {
 
       if (!field) {
 
-        res.status(404);
+        this.res.status(404);
 
       } else {
 
-        res.status(204);
+        this.res.status(204);
       }
 
       return field;
@@ -172,11 +171,11 @@ class MongoService {
   }
 
 
-  removeSubField(res, id, subid){
+  removeSubField(id, subid){
 
     if (!id || !subid) {
 
-      res.status(403);
+      this.res.status(403);
       return Promise.resolve(null);
     }
 
@@ -185,11 +184,11 @@ class MongoService {
 
       if (!field) {
 
-        res.status(404);
+        this.res.status(404);
 
       } else {
 
-        res.status(204);
+        this.res.status(204);
       }
 
       return field;
@@ -197,7 +196,7 @@ class MongoService {
   }
 
 
-  getField(res, id){
+  getField(id){
 
     let query = {};
 
@@ -210,11 +209,11 @@ class MongoService {
 
       if (!field || field.length <= 0) {
 
-        res.status(404);
+        this.res.status(404);
 
       } else {
 
-        res.status(200);
+        this.res.status(200);
       }
 
       return field;
