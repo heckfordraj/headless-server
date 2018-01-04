@@ -1,15 +1,17 @@
 const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
 const chai = require('chai');
 const chaiSubset = require('chai-subset');
+const chaiHttp = require('chai-http');
 const expect = chai.expect;
-const httpMocks = require('node-mocks-http');
-const randomstring = require('randomstring').generate(5);
 
+const config = require('../config.json');
+const app = require('../app/app.js');
 const MongoService = require('../app/service.js');
-const res = httpMocks.createResponse();
+const url = 'http://localhost:4100';
 
 chai.use(chaiSubset);
+chai.use(chaiHttp);
+
 
 describe('Server', () => {
 
@@ -17,7 +19,7 @@ describe('Server', () => {
 
   beforeEach((done) => {
 
-    mongoose.connect('mongodb://localhost/' + randomstring, { useMongoClient: true })
+    mongoose.connect(config['test'], { useMongoClient: true })
     .then((database) => {
 
       db = database;
@@ -25,7 +27,7 @@ describe('Server', () => {
 
       done();
     })
-    .catch((err) => {
+    .catch(err => {
 
       done(new Error('Failed to connect to MongoDB'));
     });
@@ -58,13 +60,12 @@ describe('Server', () => {
 
       it('get all collections', () => {
 
-        let mongoService = new MongoService(res);
+        return chai.request(url)
+        .get('/api/get')
+        .then(res => {
 
-        return mongoService.getCollections()
-        .then((collections) => {
-
-          expect(res.statusCode).to.equal(200);
-          expect(collections).to.be.an('array').to.have.lengthOf.at.least(1);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an('array').to.have.lengthOf.at.least(1);
         });
       });
 
@@ -79,46 +80,48 @@ describe('Server', () => {
 
       it('add field', () => {
 
-        let field = { name: 'Title' };
+        return chai.request(url)
+        .post('/api/add')
+        .send({ name: 'Title' })
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addField(field)
-        .then(() => {
-
-          expect(res.statusCode).to.equal(201);
+          expect(res).to.have.status(201);
+          expect(res.body.name).to.equal('Title');
         });
       });
 
       it('add field to database', () => {
 
-        return mongoose.model('Page').count()
-        .then((length) => {
+        return mongoose.model('Page').findOne({ name: 'Title' })
+        .then(res => {
 
-          expect(length).to.equal(1);
+          expect(res).to.be.not.null;
         })
       });
 
       it('reject duplicate name', () => {
 
-        let field = { name: 'Title' };
+        return chai.request(url)
+        .post('/api/add')
+        .send({ name: 'Title' })
+        .catch(err => err.response)
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addField(field)
-        .then(() => {
-
-          expect(res.statusCode).to.equal(409);
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.null;
         });
       });
 
       it('reject similar name', () => {
 
-        let field = { name: '   tiTLe ' };
+        return chai.request(url)
+        .post('/api/add')
+        .send({ name: '   tiTLe ' })
+        .catch(err => err.response)
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addField(field)
-        .then(() => {
-
-          expect(res.statusCode).to.equal(409);
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -129,13 +132,14 @@ describe('Server', () => {
 
       it('accept empty name', () => {
 
-        let field = { name: null };
+        return chai.request(url)
+        .post('/api/add')
+        .send({ name: null })
+        .catch(err => err.response)
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addField(field)
-        .then(() => {
-
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -157,7 +161,7 @@ describe('Server', () => {
     before(() => {
 
       return mongoose.model('Page').create({ name: 'Title' })
-      .then((field) => {
+      .then(field => {
 
         testField = field;
       });
@@ -168,41 +172,44 @@ describe('Server', () => {
 
       it('add text subfield', () => {
 
-        let field = { id: testField.id, data: { 'type': 'text', data: 'Hello' } };
+        return chai.request(url)
+        .post('/api/add/field')
+        .send({ id: testField.id, data: { 'type': 'text', data: 'Hello' } })
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addSubField(field)
-        .then((field) => {
-
-          expect(res.statusCode).to.equal(201);
-          expect(field.data).to.containSubset([{ _id: String }]);
-          expect(field.data).to.containSubset([{ data: 'Hello' }]);
+          expect(res).to.have.status(201);
+          expect(res.body.data).to.containSubset([{ _id: String }]);
+          expect(res.body.data).to.containSubset([{ data: 'Hello' }]);
         });
       });
+
+      it('add text subfield to database');
 
       it('add image subfield', () => {
 
-        let field = { id: testField.id, data: { 'type': 'image', url: 'http://localhost/img/1.jpg' } };
+        return chai.request(url)
+        .post('/api/add/field')
+        .send({ id: testField.id, data: { 'type': 'image', url: 'http://localhost/img/1.jpg' } })
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addSubField(field)
-        .then((field) => {
-
-          expect(res.statusCode).to.equal(201);
-          expect(field.data).to.containSubset([{ _id: String }]);
-          expect(field.data).to.containSubset([{ url: 'http://localhost/img/1.jpg' }]);
+          expect(res).to.have.status(201);
+          expect(res.body.data).to.containSubset([{ _id: String }]);
+          expect(res.body.data).to.containSubset([{ url: 'http://localhost/img/1.jpg' }]);
         });
       });
 
+      it('add image subfield to database');
+
       it('reject nonexistent field', () => {
 
-        let field = { id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { 'type': 'text', data: 'Hello' } };
+        return chai.request(url)
+        .post('/api/add/field')
+        .send({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { 'type': 'text', data: 'Hello' } })
+        .catch(err => err.response)
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addSubField(field)
-        .then((field) => {
-
-          expect(res.statusCode).to.equal(404);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -213,38 +220,40 @@ describe('Server', () => {
 
       it('accept empty field id', () => {
 
-        let field = { id: null, data: { 'type': 'text', data: 'Hello' } };
+        return chai.request(url)
+        .post('/api/add/field')
+        .send({ id: null, data: { 'type': 'text', data: 'Hello' } })
+        .catch(err => err.response)
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addSubField(field)
-        .then((field) => {
-
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
       it('accept empty field data', () => {
 
-        let field = { id: testField.id, data: null };
+        return chai.request(url)
+        .post('/api/add/field')
+        .send({ id: testField.id, data: null })
+        .catch(err => err.response)
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addSubField(field)
-        .then((field) => {
-
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
       it('should not overwrite subfield', () => {
 
-        let field = { id: testField.id, data: { 'type': 'text', data: 'Hi' } };
+        return chai.request(url)
+        .post('/api/add/field')
+        .send({ id: testField.id, data: { 'type': 'text', data: 'Hi' } })
+        .catch(err => err.response)
+        .then(res => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.addSubField(field)
-        .then((field) => {
-
-          expect(res.statusCode).to.equal(201);
-          expect(field.data).to.be.an('array').to.have.lengthOf(3);
+          expect(res).to.have.status(201);
+          expect(res.body.data).to.be.an('array').to.have.lengthOf(3);
         });
       });
 
@@ -276,18 +285,20 @@ describe('Server', () => {
 
       it('update field', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateField({ name: 'New Title', id: testFields[0].id })
-        .then(() => {
+        return chai.request(url)
+        .put('/api/update')
+        .send({ name: 'New Title', id: testFields[0].id })
+        .then(res => {
 
-          expect(res.statusCode).to.equal(200);
+          expect(res).to.have.status(200);
+          expect(res.body.name).to.equal('New Title');
         });
       });
 
       it('update database field', () => {
 
         return mongoose.model('Page').findById(testFields[0].id)
-        .then((field) => {
+        .then(field => {
 
           expect(field.name).to.equal('New Title');
         });
@@ -295,31 +306,40 @@ describe('Server', () => {
 
       it('reject nonexistent field', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateField({ name: 'Title', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
-        .then(() => {
+        return chai.request(url)
+        .put('/api/update')
+        .send({ name: 'Title', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(404);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.null;
         });
       });
 
       it('reject duplicate name', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateField({ name: 'New Title', id: testFields[1].id })
-        .then(() => {
+        return chai.request(url)
+        .put('/api/update')
+        .send({ name: 'New Title', id: testFields[1].id })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(409);
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.null;
         });
       });
 
       it('reject similar name', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateField({ name: ' neW  tItle   ', id: testFields[1].id })
-        .then(() => {
+        return chai.request(url)
+        .put('/api/update')
+        .send({ name: ' neW  tItle   ', id: testFields[1].id })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(409);
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -329,11 +349,14 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateField({ name: 'New Title' })
-        .then(() => {
+        return chai.request(url)
+        .put('/api/update')
+        .send({ name: 'New Title' })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -355,7 +378,7 @@ describe('Server', () => {
     before(() => {
 
       return mongoose.model('Page').create({ name: 'Title', data: { type: 'text', data: 'Hello' } })
-      .then((field) => {
+      .then(field => {
 
         testField = field;
       });
@@ -366,19 +389,20 @@ describe('Server', () => {
 
       it('update subfield', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateSubField({ id: testField.id, data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hi' } })
-        .then((field) => {
+        return chai.request(url)
+        .put('/api/update/field')
+        .send({ id: testField.id, data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hi' } })
+        .then(res => {
 
-          expect(res.statusCode).to.equal(200);
-          expect(field.data[0].data).to.equal('Hi');
+          expect(res).to.have.status(200);
+          expect(res.body.data[0].data).to.equal('Hi');
         });
       });
 
       it('update database subfield', () => {
 
         return mongoose.model('Page').findById(testField.id)
-        .then((field) => {
+        .then(field => {
 
           expect(field.data[0].data).to.equal('Hi');
         });
@@ -386,21 +410,27 @@ describe('Server', () => {
 
       it('reject nonexistent field', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateSubField({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
-        .then((field) => {
+        return chai.request(url)
+        .put('/api/update/field')
+        .send({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(404);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.null;
         });
       });
 
       it('reject nonexistent subfield', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateSubField({ id: testField.id, data: { type: testField.data[0].type, id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: 'Hi' } })
-        .then((field) => {
+        return chai.request(url)
+        .put('/api/update/field')
+        .send({ id: testField.id, data: { type: testField.data[0].type, id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: 'Hi' } })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(404);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -411,41 +441,53 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateSubField({ data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
-        .then((field) => {
+        return chai.request(url)
+        .put('/api/update/field')
+        .send({ data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
       it('accept empty data', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateSubField({ id: testField.id, data: null })
-        .then((field) => {
+        return chai.request(url)
+        .put('/api/update/field')
+        .send({ id: testField.id, data: null })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
       it('accept empty data type', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateSubField({ id: testField.id, data: { id: testField.data[0].id, data: 'Hello' } })
-        .then((field) => {
+        return chai.request(url)
+        .put('/api/update/field')
+        .send({ id: testField.id, data: { id: testField.data[0].id, data: 'Hello' } })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
       it('accept empty data id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.updateSubField({ id: testField.id, data: { type: testField.data[0].type, data: 'Hello' } })
-        .then((field) => {
+        return chai.request(url)
+        .put('/api/update/field')
+        .send({ id: testField.id, data: { type: testField.data[0].type, data: 'Hello' } })
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -467,7 +509,7 @@ describe('Server', () => {
     before(() => {
 
       return mongoose.model('Page').create({ name: 'Title' })
-      .then((field) => {
+      .then(field => {
 
         testField = field;
       });
@@ -478,30 +520,33 @@ describe('Server', () => {
 
       it('remove field', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeField(testField._id)
-        .then(() => {
+        return chai.request(url)
+        .delete(`/api/remove/${testField._id}`)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(204);
+          expect(res).to.have.status(204);
+          expect(res.body).to.be.empty;
         });
       });
 
       it('remove field from database', () => {
 
-        return mongoose.model('Page').count()
-        .then((length) => {
+        return mongoose.model('Page').findById(testField._id)
+        .then(field => {
 
-          expect(length).to.equal(0);
-        })
+          expect(field).to.be.null;
+        });
       });
 
       it('reject nonexistent field', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeField('aaaaaaaaaaaaaaaaaaaaaaaa')
-        .then(() => {
+        return chai.request(url)
+        .delete('/api/remove/aaaaaaaaaaaaaaaaaaaaaaaa')
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(404);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -512,11 +557,13 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeField(null)
-        .then(() => {
+        return chai.request(url)
+        .delete('/api/remove/')
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -532,7 +579,7 @@ describe('Server', () => {
     before(() => {
 
       return mongoose.model('Page').create({ name: 'Title', data: [{ type: 'text', data: 'Hello' }, { type: 'text', data: 'Hello' }] })
-      .then((field) => {
+      .then(field => {
 
         testField = field;
       });
@@ -543,31 +590,38 @@ describe('Server', () => {
 
       it('remove subfield', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeSubField(testField.id, testField.data[0].id)
-        .then(() => {
+        return chai.request(url)
+        .delete(`/api/remove/${testField.id}/${testField.data[0].id}`)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(204);
+          expect(res).to.have.status(204);
+          expect(res.body).to.be.empty;
         });
       });
 
+      it('remove subfield from database');
+
       it('reject nonexistent id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeSubField('aaaaaaaaaaaaaaaaaaaaaaaa', testField.data[0].id)
-        .then(() => {
+        return chai.request(url)
+        .delete(`/api/remove/aaaaaaaaaaaaaaaaaaaaaaaa/${testField.data[0].id}`)
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(404);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.null;
         });
       });
 
       it('reject nonexistent data id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeSubField(testField.id, 'aaaaaaaaaaaaaaaaaaaaaaaa')
-        .then(() => {
+        return chai.request(url)
+        .delete(`/api/remove/${testField.id}/aaaaaaaaaaaaaaaaaaaaaaaa`)
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(404);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.null;
         });
       });
 
@@ -578,28 +632,32 @@ describe('Server', () => {
 
       it('accept empty id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeSubField(null, testField.data[0].id)
-        .then(() => {
+        return chai.request(url)
+        .delete(`/api/remove/null/${testField.data[0].id}`)
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
       it('accept empty data id', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.removeSubField(testField.id, null)
-        .then(() => {
+        return chai.request(url)
+        .delete(`/api/remove/${testField.id}/null`)
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(403);
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.null;
         });
       });
 
       it('remove field', () => {
 
         return mongoose.model('Page').findById(testField.id)
-        .then((field) => {
+        .then(field => {
 
           expect(field).to.not.be.null;
         });
@@ -608,7 +666,7 @@ describe('Server', () => {
       it('remove duplicate subfield', () => {
 
         return mongoose.model('Page').findById(testField.id)
-        .then((field) => {
+        .then(field => {
 
           expect(field.data).to.be.an('array').to.have.lengthOf(1);
         });
@@ -643,34 +701,35 @@ describe('Server', () => {
 
       it('get field', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.getField(testFields[0]._id)
-        .then((field) => {
+        return chai.request(url)
+        .get(`/api/get/page/${testFields[0]._id}`)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(200);
-          expect(field[0].name).to.equal('Title 1');
+          expect(res).to.have.status(200);
+          expect(res.body[0].name).to.equal('Title 1');
         });
       });
 
       it('get all fields', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.getField(null)
-        .then((fields) => {
+        return chai.request(url)
+        .get('/api/get/page')
+        .then(res => {
 
-          expect(res.statusCode).to.equal(200);
-          expect(fields).to.have.lengthOf(2);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.lengthOf(2);
         });
       });
 
       it('reject nonexistent field', () => {
 
-        let mongoService = new MongoService(res);
-        return mongoService.getField('aaaaaaaaaaaaaaaaaaaaaaaa')
-        .then((field) => {
+        return chai.request(url)
+        .get('/api/get/page/aaaaaaaaaaaaaaaaaaaaaaaa')
+        .catch(err => err.response)
+        .then(res => {
 
-          expect(res.statusCode).to.equal(404);
-          expect(field).to.be.an('array').that.is.empty;
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.an('array').that.is.empty;
         });
       });
 

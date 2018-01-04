@@ -1,10 +1,25 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const app = express();
 
+const config = require('../config.json');
 const MongoService = require('./service.js');
 const UploadService = require('./upload.js');
+
+const env = process.env.NODE_ENV || 'dev';
+
+let log = function(){};
+
+if (env !== 'test') {
+
+  log = console.log;
+
+  mongoose.connect(config[env], {
+    useMongoClient: true
+  });
+}
 
 app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(bodyParser.json());
@@ -12,9 +27,10 @@ app.use(bodyParser.json());
 
 app.post('/upload', function (req, res) {
 
-  console.log('uploadImage' + req.file);
+  log('uploadImage');
 
   let uploadService = new UploadService(req, res);
+
   return uploadService.uploadImage()
   .then((data) => {
 
@@ -24,11 +40,11 @@ app.post('/upload', function (req, res) {
 
 app.get('/api/get', function (req, res) {
 
-  console.log(`getCollection: ${req.params.collection}`);
+  log('getCollections');
 
   let mongoService = new MongoService(res);
 
-  return mongoService.getCollection(req.params.collection)
+  return mongoService.getCollections()
   .then((data) => {
 
     res.json(data);
@@ -37,7 +53,7 @@ app.get('/api/get', function (req, res) {
 
 app.get(['/api/get/:collection', '/api/get/:collection/:id'], function (req, res) {
 
-  console.log(`getField: collection: ${req.params.collection}, field id: ${req.params.id || ''}`);
+  log(`getField: collection: ${req.params.collection}, field id: ${req.params.id || ''}`);
 
   let mongoService = new MongoService(res);
 
@@ -50,7 +66,7 @@ app.get(['/api/get/:collection', '/api/get/:collection/:id'], function (req, res
 
 app.post('/api/add', function (req, res) {
 
-  console.log(`addField: collection: page, field name: ${req.body.name || ''}`);
+  log(`addField: collection: page, field name: ${req.body.name || ''}`);
 
   let mongoService = new MongoService(res);
 
@@ -63,7 +79,7 @@ app.post('/api/add', function (req, res) {
 
 app.post('/api/add/field', function (req, res) {
 
-  console.log(`addSubField: collection: page, field id: ${req.body.id || ''}, subfield type: ${req.body.data.type || ''}`);
+  log(`addSubField: collection: page, field id: ${req.body.id || ''}, subfield type: ${req.body.data ? req.body.data.type : ''}`);
 
   let mongoService = new MongoService(res);
 
@@ -76,7 +92,7 @@ app.post('/api/add/field', function (req, res) {
 
 app.put('/api/update', function (req, res) {
 
-  console.log(`updateField: collection: page, field id: ${req.body.id || ''}`);
+  log(`updateField: collection: page, field id: ${req.body.id || ''}`);
 
   let mongoService = new MongoService(res);
 
@@ -89,7 +105,7 @@ app.put('/api/update', function (req, res) {
 
 app.put('/api/update/field', function (req, res) {
 
-  console.log(`updateSubField: collection: page, field id: ${req.body.id || ''}, subfield type: ${req.body.data.type || ''}`);
+  log(`updateSubField: collection: page, field id: ${req.body.id || ''}, subfield type: ${req.body.data ? req.body.data.type : ''}`);
 
   let mongoService = new MongoService(res);
 
@@ -102,7 +118,7 @@ app.put('/api/update/field', function (req, res) {
 
 app.delete(['/api/remove', '/api/remove/:id'], function (req, res) {
 
-  console.log(`removeField: collection: page, field id: ${req.params.id || ''}`);
+  log(`removeField: collection: page, field id: ${req.params.id || ''}`);
 
   let mongoService = new MongoService(res);
 
@@ -115,7 +131,7 @@ app.delete(['/api/remove', '/api/remove/:id'], function (req, res) {
 
 app.delete('/api/remove/:id/:subid', function (req, res) {
 
-  console.log(`removeSubField: collection: page, field id: ${req.params.id || ''}, subfield id: ${req.params.subid || ''}`);
+  log(`removeSubField: collection: page, field id: ${req.params.id || ''}, subfield id: ${req.params.subid || ''}`);
 
   let mongoService = new MongoService(res);
 
@@ -126,4 +142,4 @@ app.delete('/api/remove/:id/:subid', function (req, res) {
   });
 })
 
-app.listen(4100, () => console.log('Server listening on port 4100'));
+app.listen(4100, () => log('Server listening on port 4100'));

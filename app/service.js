@@ -6,10 +6,6 @@ var ObjectId = mongoose.Types.ObjectId;
 mongoose.Promise = global.Promise;
 new Collections;
 
-mongoose.connect('mongodb://localhost/db', {
-  useMongoClient: true
-});
-
 
 class MongoService {
 
@@ -65,7 +61,7 @@ class MongoService {
 
   addSubField(field){
 
-    if (!field || !field.id || !field.data) {
+    if (!field || !field.id || field.id.length < 12 || !field.data) {
 
       this.res.status(403);
       return Promise.resolve(null);
@@ -89,7 +85,7 @@ class MongoService {
 
   updateField(field){
 
-    if (!field || !field.id) {
+    if (!field || !field.id || field.id.length < 12) {
 
       this.res.status(403);
       return Promise.resolve(null);
@@ -124,7 +120,7 @@ class MongoService {
 
   updateSubField(field){
 
-    if (!field || !field.id || !field.data || !field.data.type || !field.data.id) {
+    if (!field || !field.id || field.id.length < 12 || !field.data || !field.data.type || !field.data.id || field.data.id.length < 12) {
 
       this.res.status(403);
       return Promise.resolve(null);
@@ -149,7 +145,7 @@ class MongoService {
 
   removeField(id){
 
-    if (!id) {
+    if (!id || id.length < 12) {
       this.res.status(403);
       return Promise.resolve(null);
     }
@@ -173,7 +169,7 @@ class MongoService {
 
   removeSubField(id, subid){
 
-    if (!id || !subid) {
+    if (!id || !subid || id.length < 12 || subid.length < 12) {
 
       this.res.status(403);
       return Promise.resolve(null);
