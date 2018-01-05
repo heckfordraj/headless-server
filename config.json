@@ -1,10 +1,37 @@
 {
-  "dev": {
-    "mongodb": "mongodb://localhost/db",
-    "uploads" : "./uploads"
+  "env": {
+    "dev": {
+      "mongodb": "mongodb://localhost/db",
+      "uploads" : "./uploads"
+    },
+    "test": {
+      "mongodb": "mongodb://localhost/testdb",
+      "uploads" : "./uploads/temp"
+    }
   },
-  "test": {
-    "mongodb": "mongodb://localhost/testdb",
-    "uploads" : "./uploads/temp"
+  "upload": {
+    "filetypes": "image/jpeg|image/png",
+    "sizes": [
+      {
+        "name": "xs",
+        "width": 800,
+        "height": 533
+      },
+      {
+        "name": "sm",
+        "width": 1200,
+        "height": 800
+      },
+      {
+        "name": "md",
+        "width": 1800,
+        "height": 1200
+      },
+      {
+        "name": "lg",
+        "width": 2400,
+        "height": 1600
+      }
+    ]
   }
 }

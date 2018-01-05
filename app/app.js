@@ -13,10 +13,10 @@ const env = process.env.NODE_ENV || 'dev';
 let log = function(){};
 
 if (env !== 'test') {
-
+  
   log = console.log;
 
-  mongoose.connect(config[env].mongodb, {
+  mongoose.connect(config.env[env].mongodb, {
     useMongoClient: true
   });
 }
@@ -30,7 +30,6 @@ app.get(['/image', '/image/:id'], function (req, res) {
   log(`getImage: id: ${req.params.id}`);
 
   let uploadService = new UploadService(req, res);
-
   return uploadService.getImage(req.params.id);
 })
 
@@ -39,12 +38,7 @@ app.post('/upload', function (req, res) {
   log('addImage');
 
   let uploadService = new UploadService(req, res);
-
-  return uploadService.addImage()
-  .then((data) => {
-
-    res.json(data);
-  });
+  return uploadService.addImage();
 })
 
 app.get('/api/get', function (req, res) {

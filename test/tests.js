@@ -14,12 +14,12 @@ chai.use(chaiHttp);
 
 
 describe('Server', () => {
-
+  
   let db;
 
   beforeEach((done) => {
 
-    mongoose.connect(config['test'].mongodb, { useMongoClient: true })
+    mongoose.connect(config.env['test'].mongodb, { useMongoClient: true })
     .then((database) => {
 
       db = database;

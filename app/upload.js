@@ -1,21 +1,17 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const multer = require('multer');
+const storage = multer.memoryStorage();
+const multerOptions = multer({ storage: storage });
+const fileType = require('file-type');
+const sharp = require('sharp');
+
 const config = require('../config.json');
 const env = process.env.NODE_ENV || 'dev';
 
-const multerOptions = multer({
-  dest: config[env].uploads,
-  fileFilter: function(req, file, cb) {
-
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-
-      return cb(null, true);
-    }
-
-    cb(null, false);
-  }
-});
+const filetypes = new RegExp(config.upload.filetypes);
+const sizes = config.upload.sizes;
 
 
 class UploadService {
@@ -25,25 +21,41 @@ class UploadService {
     this.res = res;
   }
 
+
   addImage() {
 
-    return new Promise((resolve) => {
+    let upload = multerOptions.single('image');
 
-      let upload = multerOptions.single('image');
+    return upload(this.req, this.res, (err) => {
 
-      upload(this.req, this.res, (err) => {
+      let mimetype = fileType(this.req.file.buffer || null);
 
-        if (err || !this.req.file) {
+      if (err || !this.req.file || !this.req.file.buffer || !mimetype || !filetypes.test(mimetype.mime)) {
 
-          this.res.status(403);
-          return resolve(err);
-        }
+        return this.res.status(403).send(new Error(err || null));
+      }
 
-        this.res.status(201);
-        return resolve(this.req.file);
+      let rand = crypto.randomBytes(16);
+      let filename = rand.toString('hex');
+
+      const images = sizes.map((size) => {
+
+        let filepath = path.join(config.env[env].uploads, `${filename}-${size.name}`);
+
+        return sharp(this.req.file.buffer)
+        .resize(size.width, size.height)
+        .max()
+        .toFile(filepath)
+        .then(() => {
+
+          return { [size.name]: filepath };
+        });
       })
 
-    })
+      Promise.all(images)
+      .then(data => this.res.status(201).json(Object.assign({}, ...data)))
+      .catch(err => this.res.status(500).send(new Error(err)))
+    });
   }
 
   getImage(id) {
@@ -58,7 +70,7 @@ class UploadService {
 
       this.res.setHeader('Content-Type', 'image/jpeg')
 
-      return this.res.sendFile(id, { root: `./${config[env].uploads}` });
+      return this.res.sendFile(id, { root: `./${config.env[env].uploads}` });
     });
   }
 

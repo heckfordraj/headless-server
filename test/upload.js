@@ -1,8 +1,10 @@
 const fs = require('fs-extra');
 const path = require('path');
+const util = require('util');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const expect = chai.expect;
+const sizeOf = require('image-size');
 
 const config = require('../config.json');
 const app = require('../app/app.js');
@@ -13,6 +15,12 @@ chai.use(chaiHttp);
 
 
 describe('UploadService', () => {
+
+  before(() => {
+
+    return fs.ensureDir(config.env.test.uploads);
+  });
+
 
   let testImage;
 
@@ -30,30 +38,44 @@ describe('UploadService', () => {
     });
   });
 
-  it('should write image to disk', () => {
+  it('should write images to disk', () => {
 
-    return fs.stat(testImage.path)
-    .catch(err => err.response)
-    .then(res => {
+    let images = Object.values(testImage).map(image => {
 
-      expect(res).to.be.an('object').to.be.not.empty;
+      return fs.stat(image)
+      .catch(err => err.response)
+      .then(res => {
+
+        expect(res).to.be.an('object').to.be.not.empty;
+      });
     });
+
+    return Promise.all(images);
   });
 
-  it('should write identical image', () => {
+  it('should write resized images', () => {
 
-    return fs.stat(testImage.path)
-    .catch(err => err.response)
-    .then(res => {
+    let images = Object.values(testImage).map((image, index) => {
 
-      expect(res.size).to.equal(testImage.size);
+      let required = config.upload.sizes[index];
+      let actual = sizeOf(image);
+
+      expect(actual.width).to.be.at.most(required.width);
+      expect(actual.height).to.be.at.most(required.height);
     });
+
+    return Promise.all(images);
   });
 
-  it('should strip file extension', () => {
+  it('should strip file extensions', () => {
 
-    let ext = path.extname(testImage.path);
-    expect(ext).to.be.empty;
+    let images = Object.values(testImage).map(image => {
+
+      let ext = path.extname(image);
+      expect(ext).to.be.empty;
+    });
+
+    return Promise.all(images);
   });
 
   it('should accept .jpg', () => {
@@ -112,7 +134,7 @@ describe('UploadService', () => {
 
   after(() => {
 
-    return fs.remove(config.test.uploads);
+    return fs.remove(config.env.test.uploads);
   });
 
 });
