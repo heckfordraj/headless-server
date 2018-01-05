@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const multer = require('multer');
 const config = require('../config.json');
 const env = process.env.NODE_ENV || 'dev';
@@ -23,7 +25,7 @@ class UploadService {
     this.res = res;
   }
 
-  uploadImage() {
+  addImage() {
 
     return new Promise((resolve) => {
 
@@ -42,6 +44,22 @@ class UploadService {
       })
 
     })
+  }
+
+  getImage(id) {
+
+    return new Promise((resolve) => {
+
+      if (!id) {
+
+        this.res.status(403);
+        return resolve(null);
+      }
+
+      this.res.setHeader('Content-Type', 'image/jpeg')
+
+      return this.res.sendFile(id, { root: `./${config[env].uploads}` });
+    });
   }
 
 }

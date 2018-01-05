@@ -25,13 +25,22 @@ app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(bodyParser.json());
 
 
-app.post('/upload', function (req, res) {
+app.get(['/image', '/image/:id'], function (req, res) {
 
-  log('uploadImage');
+  log(`getImage: id: ${req.params.id}`);
 
   let uploadService = new UploadService(req, res);
 
-  return uploadService.uploadImage()
+  return uploadService.getImage(req.params.id);
+})
+
+app.post('/upload', function (req, res) {
+
+  log('addImage');
+
+  let uploadService = new UploadService(req, res);
+
+  return uploadService.addImage()
   .then((data) => {
 
     res.json(data);
