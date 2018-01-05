@@ -19,7 +19,7 @@ describe('Server', () => {
 
   beforeEach((done) => {
 
-    mongoose.connect(config['test'], { useMongoClient: true })
+    mongoose.connect(config['test'].mongodb, { useMongoClient: true })
     .then((database) => {
 
       db = database;

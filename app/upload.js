@@ -1,15 +1,17 @@
 const multer = require('multer');
+const config = require('../config.json');
+const env = process.env.NODE_ENV || 'dev';
+
 const multerOptions = multer({
-  dest: 'uploads/',
+  dest: config[env].uploads,
   fileFilter: function(req, file, cb) {
+
     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
 
-      cb(null, true);
-
-    } else {
-
-      cb('Unsupported file format', false);
+      return cb(null, true);
     }
+
+    cb(null, false);
   }
 });
 
@@ -29,7 +31,7 @@ class UploadService {
 
       upload(this.req, this.res, (err) => {
 
-        if (err) {
+        if (err || !this.req.file) {
 
           this.res.status(403);
           return resolve(err);

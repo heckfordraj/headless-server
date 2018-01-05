@@ -16,7 +16,7 @@ if (env !== 'test') {
 
   log = console.log;
 
-  mongoose.connect(config[env], {
+  mongoose.connect(config[env].mongodb, {
     useMongoClient: true
   });
 }

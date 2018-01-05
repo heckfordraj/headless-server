@@ -1,4 +1,10 @@
 {
-  "dev": "mongodb://localhost/db",
-  "test": "mongodb://localhost/testdb"
+  "dev": {
+    "mongodb": "mongodb://localhost/db",
+    "uploads" : "./uploads"
+  },
+  "test": {
+    "mongodb": "mongodb://localhost/testdb",
+    "uploads" : "./uploads/temp"
+  }
 }
