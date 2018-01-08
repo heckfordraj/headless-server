@@ -13,7 +13,7 @@ chai.use(chaiSubset);
 chai.use(chaiHttp);
 
 
-describe('Server', () => {
+describe('MongoService', () => {
 
   let db;
 
@@ -34,41 +34,33 @@ describe('Server', () => {
   });
 
 
-  describe('should', () => {
+  it('should connect to MongoDB', () => {
 
-    it('connect to MongoDB', () => {
+    let connectionStatus = mongoose.connection.readyState;
+    expect(connectionStatus).to.equal(1);
+  });
 
-      let connectionStatus = mongoose.connection.readyState;
-      expect(connectionStatus).to.equal(1);
-    });
+  it('should connect to empty db', () => {
 
-    it('connect to empty db', () => {
+    return mongoose.model('Page').count()
+    .then((length) => {
 
-      return mongoose.model('Page').count()
-      .then((length) => {
-
-        expect(length).to.equal(0);
-      })
-    });
-
+      expect(length).to.equal(0);
+    })
   });
 
 
   describe('getCollections', () => {
 
-    describe('should', () => {
+    it('should get all collections', () => {
 
-      it('get all collections', () => {
+      return chai.request(url)
+      .get('/api/get')
+      .then(res => {
 
-        return chai.request(url)
-        .get('/api/get')
-        .then(res => {
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.an('array').to.have.lengthOf.at.least(1);
-        });
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an('array').to.have.lengthOf.at.least(1);
       });
-
     });
 
   });
@@ -76,73 +68,65 @@ describe('Server', () => {
 
   describe('addField', () => {
 
-    describe('should', () => {
+    it('should add field', () => {
 
-      it('add field', () => {
+      return chai.request(url)
+      .post('/api/add')
+      .send({ name: 'Title' })
+      .then(res => {
 
-        return chai.request(url)
-        .post('/api/add')
-        .send({ name: 'Title' })
-        .then(res => {
-
-          expect(res).to.have.status(201);
-          expect(res.body.name).to.equal('Title');
-        });
+        expect(res).to.have.status(201);
+        expect(res.body.name).to.equal('Title');
       });
+    });
 
-      it('add field to database', () => {
+    it('should add field to database', () => {
 
-        return mongoose.model('Page').findOne({ name: 'Title' })
-        .then(res => {
+      return mongoose.model('Page').findOne({ name: 'Title' })
+      .then(res => {
 
-          expect(res).to.be.not.null;
-        })
+        expect(res).to.be.not.null;
+      })
+    });
+
+    it('should reject duplicate name', () => {
+
+      return chai.request(url)
+      .post('/api/add')
+      .send({ name: 'Title' })
+      .catch(err => err.response)
+      .then(res => {
+
+        expect(res).to.have.status(409);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('reject duplicate name', () => {
+    it('should reject similar name', () => {
 
-        return chai.request(url)
-        .post('/api/add')
-        .send({ name: 'Title' })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .post('/api/add')
+      .send({ name: '   tiTLe ' })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(409);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(409);
+        expect(res.body).to.be.null;
       });
-
-      it('reject similar name', () => {
-
-        return chai.request(url)
-        .post('/api/add')
-        .send({ name: '   tiTLe ' })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(409);
-          expect(res.body).to.be.null;
-        });
-      });
-
     });
 
 
-    describe('should not', () => {
+    it('should not accept empty name', () => {
 
-      it('accept empty name', () => {
+      return chai.request(url)
+      .post('/api/add')
+      .send({ name: null })
+      .catch(err => err.response)
+      .then(res => {
 
-        return chai.request(url)
-        .post('/api/add')
-        .send({ name: null })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
-
     });
 
 
@@ -168,107 +152,99 @@ describe('Server', () => {
     });
 
 
-    describe('should', () => {
+    it('should add text subfield', () => {
 
-      it('add text subfield', () => {
+      return chai.request(url)
+      .post('/api/add/field')
+      .send({ id: testField.id, data: { 'type': 'text', data: 'Hello' } })
+      .then(res => {
 
-        return chai.request(url)
-        .post('/api/add/field')
-        .send({ id: testField.id, data: { 'type': 'text', data: 'Hello' } })
-        .then(res => {
-
-          expect(res).to.have.status(201);
-          expect(res.body.data).to.containSubset([{ type: 'text', _id: String, data: 'Hello' }]);
-        });
+        expect(res).to.have.status(201);
+        expect(res.body.data).to.containSubset([{ type: 'text', _id: String, data: 'Hello' }]);
       });
+    });
 
-      it('add text subfield to database', () => {
+    it('should add text subfield to database', () => {
 
-        return mongoose.model('Page').findById(testField.id)
-        .then(field => {
+      return mongoose.model('Page').findById(testField.id)
+      .then(field => {
 
-          expect(field.data).to.containSubset([{ type: 'text', _id: String, data: 'Hello' }]);
-        });
+        expect(field.data).to.containSubset([{ type: 'text', _id: String, data: 'Hello' }]);
       });
+    });
 
-      it('add image subfield', () => {
+    it('should add image subfield', () => {
 
-        return chai.request(url)
-        .post('/api/add/field')
-        .send({ id: testField.id, data: { 'type': 'image', url: 'http://localhost/img/1.jpg' } })
-        .then(res => {
+      return chai.request(url)
+      .post('/api/add/field')
+      .send({ id: testField.id, data: { 'type': 'image', url: 'http://localhost/img/1.jpg' } })
+      .then(res => {
 
-          expect(res).to.have.status(201);
-          expect(res.body.data).to.containSubset([{ type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }]);
-        });
+        expect(res).to.have.status(201);
+        expect(res.body.data).to.containSubset([{ type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }]);
       });
+    });
 
-      it('add image subfield to database', () => {
+    it('should add image subfield to database', () => {
 
-        return mongoose.model('Page').findById(testField.id)
-        .then(field => {
+      return mongoose.model('Page').findById(testField.id)
+      .then(field => {
 
-          expect(field.data).to.containSubset([{ type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }]);
-        });
+        expect(field.data).to.containSubset([{ type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }]);
       });
+    });
 
-      it('reject nonexistent field', () => {
+    it('should reject nonexistent field', () => {
 
-        return chai.request(url)
-        .post('/api/add/field')
-        .send({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { 'type': 'text', data: 'Hello' } })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .post('/api/add/field')
+      .send({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { 'type': 'text', data: 'Hello' } })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.null;
       });
-
     });
 
 
-    describe('should not', () => {
+    it('should not accept empty field id', () => {
 
-      it('accept empty field id', () => {
+      return chai.request(url)
+      .post('/api/add/field')
+      .send({ id: null, data: { 'type': 'text', data: 'Hello' } })
+      .catch(err => err.response)
+      .then(res => {
 
-        return chai.request(url)
-        .post('/api/add/field')
-        .send({ id: null, data: { 'type': 'text', data: 'Hello' } })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('accept empty field data', () => {
+    it('should not accept empty field data', () => {
 
-        return chai.request(url)
-        .post('/api/add/field')
-        .send({ id: testField.id, data: null })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .post('/api/add/field')
+      .send({ id: testField.id, data: null })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('should not overwrite subfield', () => {
+    it('should not overwrite subfield', () => {
 
-        return chai.request(url)
-        .post('/api/add/field')
-        .send({ id: testField.id, data: { 'type': 'text', data: 'Hi' } })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .post('/api/add/field')
+      .send({ id: testField.id, data: { 'type': 'text', data: 'Hi' } })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(201);
-          expect(res.body.data).to.be.an('array').to.have.lengthOf(3);
-        });
+        expect(res).to.have.status(201);
+        expect(res.body.data).to.be.an('array').to.have.lengthOf(3);
       });
-
     });
 
 
@@ -293,85 +269,79 @@ describe('Server', () => {
       });
     });
 
-    describe('should', () => {
 
-      it('update field', () => {
+    it('should update field', () => {
 
-        return chai.request(url)
-        .put('/api/update')
-        .send({ name: 'New Title', id: testFields[0].id })
-        .then(res => {
+      return chai.request(url)
+      .put('/api/update')
+      .send({ name: 'New Title', id: testFields[0].id })
+      .then(res => {
 
-          expect(res).to.have.status(200);
-          expect(res.body.name).to.equal('New Title');
-        });
+        expect(res).to.have.status(200);
+        expect(res.body.name).to.equal('New Title');
       });
-
-      it('update database field', () => {
-
-        return mongoose.model('Page').findById(testFields[0].id)
-        .then(field => {
-
-          expect(field.name).to.equal('New Title');
-        });
-      });
-
-      it('reject nonexistent field', () => {
-
-        return chai.request(url)
-        .put('/api/update')
-        .send({ name: 'Title', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.null;
-        });
-      });
-
-      it('reject duplicate name', () => {
-
-        return chai.request(url)
-        .put('/api/update')
-        .send({ name: 'New Title', id: testFields[1].id })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(409);
-          expect(res.body).to.be.null;
-        });
-      });
-
-      it('reject similar name', () => {
-
-        return chai.request(url)
-        .put('/api/update')
-        .send({ name: ' neW  tItle   ', id: testFields[1].id })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(409);
-          expect(res.body).to.be.null;
-        });
-      });
-
     });
 
-    describe('should not', () => {
+    it('should update database field', () => {
 
-      it('accept empty id', () => {
+      return mongoose.model('Page').findById(testFields[0].id)
+      .then(field => {
 
-        return chai.request(url)
-        .put('/api/update')
-        .send({ name: 'New Title' })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(field.name).to.equal('New Title');
       });
+    });
 
+    it('should reject nonexistent field', () => {
+
+      return chai.request(url)
+      .put('/api/update')
+      .send({ name: 'Title', id: 'aaaaaaaaaaaaaaaaaaaaaaaa' })
+      .catch(err => err.response)
+      .then(res => {
+
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.null;
+      });
+    });
+
+    it('should reject duplicate name', () => {
+
+      return chai.request(url)
+      .put('/api/update')
+      .send({ name: 'New Title', id: testFields[1].id })
+      .catch(err => err.response)
+      .then(res => {
+
+        expect(res).to.have.status(409);
+        expect(res.body).to.be.null;
+      });
+    });
+
+    it('should reject similar name', () => {
+
+      return chai.request(url)
+      .put('/api/update')
+      .send({ name: ' neW  tItle   ', id: testFields[1].id })
+      .catch(err => err.response)
+      .then(res => {
+
+        expect(res).to.have.status(409);
+        expect(res.body).to.be.null;
+      });
+    });
+
+
+    it('should not accept empty id', () => {
+
+      return chai.request(url)
+      .put('/api/update')
+      .send({ name: 'New Title' })
+      .catch(err => err.response)
+      .then(res => {
+
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
+      });
     });
 
 
@@ -397,112 +367,104 @@ describe('Server', () => {
     });
 
 
-    describe('should', () => {
+    it('should update subfield', () => {
 
-      it('update subfield', () => {
+      return chai.request(url)
+      .put('/api/update/field')
+      .send({ id: testField.id, data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hi' } })
+      .then(res => {
 
-        return chai.request(url)
-        .put('/api/update/field')
-        .send({ id: testField.id, data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hi' } })
-        .then(res => {
-
-          expect(res).to.have.status(200);
-          expect(res.body.data[0].data).to.equal('Hi');
-        });
+        expect(res).to.have.status(200);
+        expect(res.body.data[0].data).to.equal('Hi');
       });
+    });
 
-      it('update database subfield', () => {
+    it('should update database subfield', () => {
 
-        return mongoose.model('Page').findById(testField.id)
-        .then(field => {
+      return mongoose.model('Page').findById(testField.id)
+      .then(field => {
 
-          expect(field.data[0].data).to.equal('Hi');
-        });
+        expect(field.data[0].data).to.equal('Hi');
       });
+    });
 
-      it('reject nonexistent field', () => {
+    it('should reject nonexistent field', () => {
 
-        return chai.request(url)
-        .put('/api/update/field')
-        .send({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .put('/api/update/field')
+      .send({ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('reject nonexistent subfield', () => {
+    it('should reject nonexistent subfield', () => {
 
-        return chai.request(url)
-        .put('/api/update/field')
-        .send({ id: testField.id, data: { type: testField.data[0].type, id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: 'Hi' } })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .put('/api/update/field')
+      .send({ id: testField.id, data: { type: testField.data[0].type, id: 'aaaaaaaaaaaaaaaaaaaaaaaa', data: 'Hi' } })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.null;
       });
-
     });
 
 
-    describe('should not', () => {
+    it('should not accept empty id', () => {
 
-      it('accept empty id', () => {
+      return chai.request(url)
+      .put('/api/update/field')
+      .send({ data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
+      .catch(err => err.response)
+      .then(res => {
 
-        return chai.request(url)
-        .put('/api/update/field')
-        .send({ data: { type: testField.data[0].type, id: testField.data[0].id, data: 'Hello' } })
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('accept empty data', () => {
+    it('should not accept empty data', () => {
 
-        return chai.request(url)
-        .put('/api/update/field')
-        .send({ id: testField.id, data: null })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .put('/api/update/field')
+      .send({ id: testField.id, data: null })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('accept empty data type', () => {
+    it('should not accept empty data type', () => {
 
-        return chai.request(url)
-        .put('/api/update/field')
-        .send({ id: testField.id, data: { id: testField.data[0].id, data: 'Hello' } })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .put('/api/update/field')
+      .send({ id: testField.id, data: { id: testField.data[0].id, data: 'Hello' } })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('accept empty data id', () => {
+    it('should not accept empty data id', () => {
 
-        return chai.request(url)
-        .put('/api/update/field')
-        .send({ id: testField.id, data: { type: testField.data[0].type, data: 'Hello' } })
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .put('/api/update/field')
+      .send({ id: testField.id, data: { type: testField.data[0].type, data: 'Hello' } })
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
-
     });
 
 
@@ -528,57 +490,49 @@ describe('Server', () => {
     });
 
 
-    describe('should', () => {
+    it('should remove field', () => {
 
-      it('remove field', () => {
+      return chai.request(url)
+      .delete(`/api/remove/${testField._id}`)
+      .then(res => {
 
-        return chai.request(url)
-        .delete(`/api/remove/${testField._id}`)
-        .then(res => {
-
-          expect(res).to.have.status(204);
-          expect(res.body).to.be.empty;
-        });
+        expect(res).to.have.status(204);
+        expect(res.body).to.be.empty;
       });
+    });
 
-      it('remove field from database', () => {
+    it('should remove field from database', () => {
 
-        return mongoose.model('Page').findById(testField._id)
-        .then(field => {
+      return mongoose.model('Page').findById(testField._id)
+      .then(field => {
 
-          expect(field).to.be.null;
-        });
+        expect(field).to.be.null;
       });
+    });
 
-      it('reject nonexistent field', () => {
+    it('should reject nonexistent field', () => {
 
-        return chai.request(url)
-        .delete('/api/remove/aaaaaaaaaaaaaaaaaaaaaaaa')
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .delete('/api/remove/aaaaaaaaaaaaaaaaaaaaaaaa')
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.null;
       });
-
     });
 
 
-    describe('should not', () => {
+    it('should not accept empty id', () => {
 
-      it('accept empty id', () => {
+      return chai.request(url)
+      .delete('/api/remove/')
+      .catch(err => err.response)
+      .then(res => {
 
-        return chai.request(url)
-        .delete('/api/remove/')
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
-
     });
 
   });
@@ -598,100 +552,93 @@ describe('Server', () => {
     });
 
 
-    describe('should', () => {
+    it('should remove subfield', () => {
 
-      it('remove subfield', () => {
+      return chai.request(url)
+      .delete(`/api/remove/${testField.id}/${testField.data[0].id}`)
+      .then(res => {
 
-        return chai.request(url)
-        .delete(`/api/remove/${testField.id}/${testField.data[0].id}`)
-        .then(res => {
-
-          expect(res).to.have.status(204);
-          expect(res.body).to.be.empty;
-        });
+        expect(res).to.have.status(204);
+        expect(res.body).to.be.empty;
       });
+    });
 
-      it('remove subfield from database', () => {
+    it('should remove subfield from database', () => {
 
-        return mongoose.model('Page').findById(testField._id)
-        .then(field => {
+      return mongoose.model('Page').findById(testField._id)
+      .then(field => {
 
-          expect(field.data).to.have.lengthOf(1);
-        });
+        expect(field.data).to.have.lengthOf(1);
       });
+    });
 
-      it('reject nonexistent id', () => {
+    it('should reject nonexistent id', () => {
 
-        return chai.request(url)
-        .delete(`/api/remove/aaaaaaaaaaaaaaaaaaaaaaaa/${testField.data[0].id}`)
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .delete(`/api/remove/aaaaaaaaaaaaaaaaaaaaaaaa/${testField.data[0].id}`)
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.null;
       });
+    });
 
-      it('reject nonexistent data id', () => {
+    it('should reject nonexistent data id', () => {
 
-        return chai.request(url)
-        .delete(`/api/remove/${testField.id}/aaaaaaaaaaaaaaaaaaaaaaaa`)
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .delete(`/api/remove/${testField.id}/aaaaaaaaaaaaaaaaaaaaaaaa`)
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.null;
       });
-
     });
 
 
-    describe('should not', () => {
+    it('should not accept empty id', () => {
 
-      it('accept empty id', () => {
+      return chai.request(url)
+      .delete(`/api/remove/null/${testField.data[0].id}`)
+      .catch(err => err.response)
+      .then(res => {
 
-        return chai.request(url)
-        .delete(`/api/remove/null/${testField.data[0].id}`)
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
       });
-
-      it('accept empty data id', () => {
-
-        return chai.request(url)
-        .delete(`/api/remove/${testField.id}/null`)
-        .catch(err => err.response)
-        .then(res => {
-
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.null;
-        });
-      });
-
-      it('remove field', () => {
-
-        return mongoose.model('Page').findById(testField.id)
-        .then(field => {
-
-          expect(field).to.not.be.null;
-        });
-      });
-
-      it('remove duplicate subfield', () => {
-
-        return mongoose.model('Page').findById(testField.id)
-        .then(field => {
-
-          expect(field.data).to.be.an('array').to.have.lengthOf(1);
-        });
-      });
-
     });
+
+    it('should not accept empty data id', () => {
+
+      return chai.request(url)
+      .delete(`/api/remove/${testField.id}/null`)
+      .catch(err => err.response)
+      .then(res => {
+
+        expect(res).to.have.status(403);
+        expect(res.body).to.be.null;
+      });
+    });
+
+    it('should not remove field', () => {
+
+      return mongoose.model('Page').findById(testField.id)
+      .then(field => {
+
+        expect(field).to.not.be.null;
+      });
+    });
+
+    it('should not remove duplicate subfield', () => {
+
+      return mongoose.model('Page').findById(testField.id)
+      .then(field => {
+
+        expect(field.data).to.be.an('array').to.have.lengthOf(1);
+      });
+    });
+
 
 
     after(() => {
@@ -716,42 +663,38 @@ describe('Server', () => {
     });
 
 
-    describe('should', () => {
+    it('should get field', () => {
 
-      it('get field', () => {
+      return chai.request(url)
+      .get(`/api/get/page/${testFields[0]._id}`)
+      .then(res => {
 
-        return chai.request(url)
-        .get(`/api/get/page/${testFields[0]._id}`)
-        .then(res => {
-
-          expect(res).to.have.status(200);
-          expect(res.body[0].name).to.equal('Title 1');
-        });
+        expect(res).to.have.status(200);
+        expect(res.body[0].name).to.equal('Title 1');
       });
+    });
 
-      it('get all fields', () => {
+    it('should get all fields', () => {
 
-        return chai.request(url)
-        .get('/api/get/page')
-        .then(res => {
+      return chai.request(url)
+      .get('/api/get/page')
+      .then(res => {
 
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.lengthOf(2);
-        });
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.lengthOf(2);
       });
+    });
 
-      it('reject nonexistent field', () => {
+    it('should reject nonexistent field', () => {
 
-        return chai.request(url)
-        .get('/api/get/page/aaaaaaaaaaaaaaaaaaaaaaaa')
-        .catch(err => err.response)
-        .then(res => {
+      return chai.request(url)
+      .get('/api/get/page/aaaaaaaaaaaaaaaaaaaaaaaa')
+      .catch(err => err.response)
+      .then(res => {
 
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.an('array').that.is.empty;
-        });
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.an('array').that.is.empty;
       });
-
     });
 
 
