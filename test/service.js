@@ -125,7 +125,7 @@ describe('MongoService', () => {
     before(() => {
       return mongoose
         .model('Page')
-        .create({ name: 'Title' })
+        .create({ name: 'Title', data: [{ type: 'text', data: 'Hello' }] })
         .then(field => {
           testField = field;
         });
@@ -138,9 +138,8 @@ describe('MongoService', () => {
         .send({ id: testField.id, data: { type: 'text', data: 'Hello' } })
         .then(res => {
           expect(res).to.have.status(201);
-          expect(res.body.data).to.containSubset([
-            { type: 'text', _id: String, data: 'Hello' }
-          ]);
+          expect(res.body.type).to.equal('text');
+          expect(res.body.data).to.equal('Hello');
         });
     });
 
@@ -165,9 +164,8 @@ describe('MongoService', () => {
         })
         .then(res => {
           expect(res).to.have.status(201);
-          expect(res.body.data).to.containSubset([
-            { type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }
-          ]);
+          expect(res.body.type).to.equal('image');
+          expect(res.body.url).to.equal('http://localhost/img/1.jpg');
         });
     });
 
@@ -222,16 +220,11 @@ describe('MongoService', () => {
     });
 
     it('should not overwrite subfield', () => {
-      return chai
-        .request(url)
-        .post('/api/add/field')
-        .send({ id: testField.id, data: { type: 'text', data: 'Hi' } })
-        .catch(err => err.response)
-        .then(res => {
-          expect(res).to.have.status(201);
-          expect(res.body.data)
-            .to.be.an('array')
-            .to.have.lengthOf(3);
+      return mongoose
+        .model('Page')
+        .findById(testField.id)
+        .then(field => {
+          expect(field.data).to.have.lengthOf(3);
         });
     });
 

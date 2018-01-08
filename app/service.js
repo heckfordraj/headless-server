@@ -53,20 +53,21 @@ class MongoService {
 
     return mongoose
       .model('Page')
-      .findByIdAndUpdate(
-        field.id,
-        { $push: { data: field.data } },
-        { new: true, runValidators: true, runSettersOnQuery: true }
-      )
-      .then(field => {
-        if (!field) {
-          this.res.status(404);
-        } else {
-          this.res.status(201);
-        }
+      .findByIdAndUpdate(field.id, {
+        new: true,
+        runValidators: true,
+        runSettersOnQuery: true
+      })
+      .then(res => {
+        let subfield = res.data.create(field.data);
+        res.data.push(subfield);
 
-        return this.res.send(field);
-      });
+        return res
+          .save()
+          .then(() => this.res.status(201).send(subfield))
+          .catch(err => this.res.sendStatus(403));
+      })
+      .catch(err => this.res.sendStatus(404));
   }
 
   updateField(field) {
