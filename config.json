@@ -2,11 +2,11 @@
   "env": {
     "dev": {
       "mongodb": "mongodb://localhost/db",
-      "uploads" : "./uploads"
+      "uploads": "./uploads"
     },
     "test": {
       "mongodb": "mongodb://localhost/testdb",
-      "uploads" : "./uploads/temp"
+      "uploads": "./uploads/temp"
     }
   },
   "upload": {

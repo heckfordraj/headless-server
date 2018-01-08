@@ -1,12 +1,13 @@
 var mongoose = require('mongoose');
-var slugify = require("underscore.string/slugify");
+var slugify = require('underscore.string/slugify');
 
 class Collections {
-
   constructor() {
-
-    var blockSchema = mongoose.Schema({ type: String }, { discriminatorKey: 'type' });
-    var Block = mongoose.model('Block', blockSchema)
+    var blockSchema = mongoose.Schema(
+      { type: String },
+      { discriminatorKey: 'type' }
+    );
+    var Block = mongoose.model('Block', blockSchema);
 
     var pageSchema = mongoose.Schema({
       type: {
@@ -29,17 +30,22 @@ class Collections {
       data: [blockSchema]
     });
 
-    pageSchema.path('data').discriminator('text', new mongoose.Schema({
-      data: String
-    }));
+    pageSchema.path('data').discriminator(
+      'text',
+      new mongoose.Schema({
+        data: String
+      })
+    );
 
-    pageSchema.path('data').discriminator('image', new mongoose.Schema({
-      url: String
-    }));
+    pageSchema.path('data').discriminator(
+      'image',
+      new mongoose.Schema({
+        url: String
+      })
+    );
 
-    mongoose.model('Page', pageSchema)
+    mongoose.model('Page', pageSchema);
   }
-
 }
 
 module.exports = Collections;
