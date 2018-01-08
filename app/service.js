@@ -1,7 +1,7 @@
-var mongoose = require('mongoose');
-var Collections = require('./collections.js');
-var Schema = mongoose.Schema;
-var ObjectId = mongoose.Types.ObjectId;
+const mongoose = require('mongoose');
+const Collections = require('./collections.js');
+const Schema = mongoose.Schema;
+const ObjectId = mongoose.Types.ObjectId;
 
 mongoose.Promise = global.Promise;
 new Collections();

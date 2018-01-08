@@ -32,7 +32,7 @@ class UploadService {
         !mimetype ||
         !filetypes.test(mimetype.mime)
       ) {
-        return this.res.status(403).send(new Error(err || null));
+        return this.res.status(403).send(err || null);
       }
 
       let rand = crypto.randomBytes(16);

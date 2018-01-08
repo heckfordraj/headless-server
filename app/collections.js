@@ -1,5 +1,5 @@
-var mongoose = require('mongoose');
-var slugify = require('underscore.string/slugify');
+const mongoose = require('mongoose');
+const slugify = require('underscore.string/slugify');
 
 class Collections {
   constructor() {
@@ -7,6 +7,7 @@ class Collections {
       { type: String },
       { discriminatorKey: 'type' }
     );
+
     var Block = mongoose.model('Block', blockSchema);
 
     var pageSchema = mongoose.Schema({
