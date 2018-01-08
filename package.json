@@ -4,6 +4,7 @@
   "description": "",
   "main": "app/app.js",
   "scripts": {
+    "start": "node app/app.js",
     "test": "export NODE_ENV=test&& mocha --exit",
     "coverage": "nyc npm test"
   },

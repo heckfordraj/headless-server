@@ -53,25 +53,21 @@ class UploadService {
       })
 
       Promise.all(images)
-      .then(data => this.res.status(201).json(Object.assign({}, ...data)))
-      .catch(err => this.res.status(500).send(new Error(err)))
+      .then(data => this.res.status(201).send(Object.assign({}, ...data)))
+      .catch(err => this.res.status(500).send(err))
     });
   }
 
   getImage(id) {
 
-    return new Promise((resolve) => {
-
       if (!id) {
 
-        this.res.status(403);
-        return resolve(null);
+        return this.res.sendStatus(403);
       }
 
       this.res.setHeader('Content-Type', 'image/jpeg')
 
       return this.res.sendFile(id, { root: `./${config.env[env].uploads}` });
-    });
   }
 
 }

@@ -98,7 +98,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(409);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -111,7 +111,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(409);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -125,7 +125,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -203,7 +203,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(404);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -217,7 +217,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -230,7 +230,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -300,7 +300,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(404);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -313,7 +313,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(409);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -326,7 +326,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(409);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -340,7 +340,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -397,7 +397,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(404);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -410,7 +410,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(404);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -424,7 +424,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -437,7 +437,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -450,7 +450,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -463,7 +463,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -518,7 +518,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(404);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -531,7 +531,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -580,7 +580,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(404);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -592,7 +592,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(404);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -605,7 +605,7 @@ describe('MongoService', () => {
       .then(res => {
 
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -615,9 +615,9 @@ describe('MongoService', () => {
       .delete(`/api/remove/${testField.id}/null`)
       .catch(err => err.response)
       .then(res => {
-
+        
         expect(res).to.have.status(403);
-        expect(res.body).to.be.null;
+        expect(res.body).to.be.empty;
       });
     });
 
@@ -626,7 +626,7 @@ describe('MongoService', () => {
       return mongoose.model('Page').findById(testField.id)
       .then(field => {
 
-        expect(field).to.not.be.null;
+        expect(field).to.not.be.empty;
       });
     });
 
