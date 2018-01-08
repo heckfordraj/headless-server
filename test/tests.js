@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 
 
 describe('Server', () => {
-  
+
   let db;
 
   beforeEach((done) => {
@@ -178,12 +178,18 @@ describe('Server', () => {
         .then(res => {
 
           expect(res).to.have.status(201);
-          expect(res.body.data).to.containSubset([{ _id: String }]);
-          expect(res.body.data).to.containSubset([{ data: 'Hello' }]);
+          expect(res.body.data).to.containSubset([{ type: 'text', _id: String, data: 'Hello' }]);
         });
       });
 
-      it('add text subfield to database');
+      it('add text subfield to database', () => {
+
+        return mongoose.model('Page').findById(testField.id)
+        .then(field => {
+
+          expect(field.data).to.containSubset([{ type: 'text', _id: String, data: 'Hello' }]);
+        });
+      });
 
       it('add image subfield', () => {
 
@@ -193,12 +199,18 @@ describe('Server', () => {
         .then(res => {
 
           expect(res).to.have.status(201);
-          expect(res.body.data).to.containSubset([{ _id: String }]);
-          expect(res.body.data).to.containSubset([{ url: 'http://localhost/img/1.jpg' }]);
+          expect(res.body.data).to.containSubset([{ type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }]);
         });
       });
 
-      it('add image subfield to database');
+      it('add image subfield to database', () => {
+
+        return mongoose.model('Page').findById(testField.id)
+        .then(field => {
+
+          expect(field.data).to.containSubset([{ type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }]);
+        });
+      });
 
       it('reject nonexistent field', () => {
 
@@ -599,7 +611,14 @@ describe('Server', () => {
         });
       });
 
-      it('remove subfield from database');
+      it('remove subfield from database', () => {
+
+        return mongoose.model('Page').findById(testField._id)
+        .then(field => {
+
+          expect(field.data).to.have.lengthOf(1);
+        });
+      });
 
       it('reject nonexistent id', () => {
 

@@ -127,7 +127,18 @@ describe('UploadService', () => {
     });
   });
 
-  it('should reject js file as .jpg');
+  it('should reject js file as .jpg', () => {
+
+    return chai.request(url)
+    .post('/upload')
+    .attach('image', fs.createReadStream('./test/assets/script.jpg'))
+    .catch(err => err.response)
+    .then(res => {
+
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.empty;
+    });
+  });
 
   it('should not accept duplicate image');
 
