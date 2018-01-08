@@ -36,20 +36,18 @@ class UploadService {
       }
 
       let rand = crypto.randomBytes(16);
-      let filename = rand.toString('hex');
+      let name = rand.toString('hex');
 
       const images = sizes.map(size => {
-        let filepath = path.join(
-          config.env[env].uploads,
-          `${filename}-${size.name}`
-        );
+        let filename = `${name}-${size.name}.${mimetype.ext}`;
+        let filepath = path.join(config.env[env].uploads, filename);
 
         return sharp(this.req.file.buffer)
           .resize(size.width, size.height)
           .max()
           .toFile(filepath)
           .then(() => {
-            return { [size.name]: filepath };
+            return { [size.name]: filename };
           });
       });
 
@@ -64,9 +62,9 @@ class UploadService {
       return this.res.sendStatus(403);
     }
 
-    this.res.setHeader('Content-Type', 'image/jpeg');
-
-    return this.res.sendFile(id, { root: `./${config.env[env].uploads}` });
+    return this.res
+      .status(200)
+      .sendFile(id, { root: `./${config.env[env].uploads}` });
   }
 }
 module.exports = UploadService;

@@ -1,1 +1,3 @@
-console.log('failed');
+<script>
+  console.log('failed');
+</script>
