@@ -48,8 +48,11 @@ class Collections {
       new mongoose.Schema({
         data: [
           {
-            url: String,
-            _id: false
+            _id: false,
+            xs: String,
+            sm: String,
+            md: String,
+            lg: String
           }
         ]
       })

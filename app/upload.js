@@ -23,16 +23,13 @@ class UploadService {
     let upload = multerOptions.single('image');
 
     return upload(this.req, this.res, err => {
-      let mimetype = fileType(this.req.file.buffer || null);
-
-      if (
-        err ||
-        !this.req.file ||
-        !this.req.file.buffer ||
-        !mimetype ||
-        !filetypes.test(mimetype.mime)
-      ) {
+      if (err || !this.req.file || !this.req.file.buffer) {
         return this.res.status(403).send(err || null);
+      }
+
+      let mimetype = fileType(this.req.file.buffer);
+      if (!mimetype || !filetypes.test(mimetype.mime)) {
+        return this.res.sendStatus(403);
       }
 
       let rand = crypto.randomBytes(16);

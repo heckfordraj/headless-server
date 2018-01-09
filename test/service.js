@@ -166,13 +166,28 @@ describe('MongoService', () => {
         .post('/api/add/field')
         .send({
           id: testField.id,
-          data: { type: 'image', data: [{ url: 'http://localhost/img/1.jpg' }] }
+          data: {
+            type: 'image',
+            data: [
+              {
+                xs: 'http://localhost/img/1.jpg',
+                sm: 'http://localhost/img/2.jpg',
+                md: 'http://localhost/img/3.jpg',
+                lg: 'http://localhost/img/4.jpg'
+              }
+            ]
+          }
         })
         .then(res => {
           expect(res).to.have.status(201);
           expect(res.body.type).to.equal('image');
           expect(res.body.data).to.containSubset([
-            { url: 'http://localhost/img/1.jpg' }
+            {
+              xs: 'http://localhost/img/1.jpg',
+              sm: 'http://localhost/img/2.jpg',
+              md: 'http://localhost/img/3.jpg',
+              lg: 'http://localhost/img/4.jpg'
+            }
           ]);
         });
     });
@@ -186,7 +201,14 @@ describe('MongoService', () => {
             {
               type: 'image',
               _id: String,
-              data: [{ url: 'http://localhost/img/1.jpg' }]
+              data: [
+                {
+                  xs: 'http://localhost/img/1.jpg',
+                  sm: 'http://localhost/img/2.jpg',
+                  md: 'http://localhost/img/3.jpg',
+                  lg: 'http://localhost/img/4.jpg'
+                }
+              ]
             }
           ]);
         });
