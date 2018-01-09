@@ -3,14 +3,35 @@ const slugify = require('underscore.string/slugify');
 
 class Collections {
   constructor() {
-    var blockSchema = mongoose.Schema(
+    const textDataSchema = mongoose.Schema({
+      text: String
+    });
+
+    const imageDataSchema = mongoose.Schema({
+      xs: String,
+      sm: String,
+      md: String,
+      lg: String
+    });
+
+    const textSchema = mongoose.Schema({
+      _id: false,
+      data: [textDataSchema]
+    });
+
+    const imageSchema = mongoose.Schema({
+      _id: false,
+      data: [imageDataSchema]
+    });
+
+    const blockSchema = mongoose.Schema(
       { type: String },
       { discriminatorKey: 'type' }
     );
 
-    var Block = mongoose.model('Block', blockSchema);
+    const Block = mongoose.model('Block', blockSchema);
 
-    var pageSchema = mongoose.Schema({
+    const pageSchema = mongoose.Schema({
       type: {
         type: String,
         default: 'page'
@@ -31,32 +52,8 @@ class Collections {
       data: [blockSchema]
     });
 
-    pageSchema.path('data').discriminator(
-      'text',
-      new mongoose.Schema({
-        data: [
-          {
-            text: String,
-            _id: false
-          }
-        ]
-      })
-    );
-
-    pageSchema.path('data').discriminator(
-      'image',
-      new mongoose.Schema({
-        data: [
-          {
-            _id: false,
-            xs: String,
-            sm: String,
-            md: String,
-            lg: String
-          }
-        ]
-      })
-    );
+    pageSchema.path('data').discriminator('text', textSchema);
+    pageSchema.path('data').discriminator('image', imageSchema);
 
     mongoose.model('Page', pageSchema);
   }
