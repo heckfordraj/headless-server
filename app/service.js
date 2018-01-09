@@ -115,20 +115,21 @@ class MongoService {
 
     return mongoose
       .model('Page')
-      .findOneAndUpdate(
-        { _id: ObjectId(field.id), 'data._id': ObjectId(field.data.id) },
-        { $set: { 'data.$': field.data } },
-        { new: true, runValidators: true, runSettersOnQuery: true }
-      )
-      .then(field => {
-        if (!field) {
-          this.res.status(404);
-        } else {
-          this.res.status(200);
-        }
+      .findByIdAndUpdate(field.id, {
+        new: true,
+        runValidators: true,
+        runSettersOnQuery: true
+      })
+      .then(res => {
+        let subfield = res.data.id(field.data.id);
+        subfield.set(field.data);
 
-        return this.res.send(field);
-      });
+        return res
+          .save()
+          .then(() => this.res.status(200).send(subfield))
+          .catch(err => this.res.sendStatus(403));
+      })
+      .catch(err => this.res.sendStatus(404));
   }
 
   removeField(id) {

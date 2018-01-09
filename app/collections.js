@@ -34,14 +34,24 @@ class Collections {
     pageSchema.path('data').discriminator(
       'text',
       new mongoose.Schema({
-        data: String
+        data: [
+          {
+            text: String,
+            _id: false
+          }
+        ]
       })
     );
 
     pageSchema.path('data').discriminator(
       'image',
       new mongoose.Schema({
-        url: String
+        data: [
+          {
+            url: String,
+            _id: false
+          }
+        ]
       })
     );
 

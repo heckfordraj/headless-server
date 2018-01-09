@@ -125,7 +125,10 @@ describe('MongoService', () => {
     before(() => {
       return mongoose
         .model('Page')
-        .create({ name: 'Title', data: [{ type: 'text', data: 'Hello' }] })
+        .create({
+          name: 'Title',
+          data: { type: 'text', data: [{ text: 'Hello' }] }
+        })
         .then(field => {
           testField = field;
         });
@@ -135,11 +138,14 @@ describe('MongoService', () => {
       return chai
         .request(url)
         .post('/api/add/field')
-        .send({ id: testField.id, data: { type: 'text', data: 'Hello' } })
+        .send({
+          id: testField.id,
+          data: { type: 'text', data: [{ text: 'Hello' }] }
+        })
         .then(res => {
           expect(res).to.have.status(201);
           expect(res.body.type).to.equal('text');
-          expect(res.body.data).to.equal('Hello');
+          expect(res.body.data).to.containSubset([{ text: 'Hello' }]);
         });
     });
 
@@ -149,7 +155,7 @@ describe('MongoService', () => {
         .findById(testField.id)
         .then(field => {
           expect(field.data).to.containSubset([
-            { type: 'text', _id: String, data: 'Hello' }
+            { type: 'text', _id: String, data: [{ text: 'Hello' }] }
           ]);
         });
     });
@@ -160,12 +166,14 @@ describe('MongoService', () => {
         .post('/api/add/field')
         .send({
           id: testField.id,
-          data: { type: 'image', url: 'http://localhost/img/1.jpg' }
+          data: { type: 'image', data: [{ url: 'http://localhost/img/1.jpg' }] }
         })
         .then(res => {
           expect(res).to.have.status(201);
           expect(res.body.type).to.equal('image');
-          expect(res.body.url).to.equal('http://localhost/img/1.jpg');
+          expect(res.body.data).to.containSubset([
+            { url: 'http://localhost/img/1.jpg' }
+          ]);
         });
     });
 
@@ -175,7 +183,11 @@ describe('MongoService', () => {
         .findById(testField.id)
         .then(field => {
           expect(field.data).to.containSubset([
-            { type: 'image', _id: String, url: 'http://localhost/img/1.jpg' }
+            {
+              type: 'image',
+              _id: String,
+              data: [{ url: 'http://localhost/img/1.jpg' }]
+            }
           ]);
         });
     });
@@ -186,7 +198,7 @@ describe('MongoService', () => {
         .post('/api/add/field')
         .send({
           id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
-          data: { type: 'text', data: 'Hello' }
+          data: { type: 'text', data: [{ text: 'Hello' }] }
         })
         .catch(err => err.response)
         .then(res => {
@@ -199,7 +211,7 @@ describe('MongoService', () => {
       return chai
         .request(url)
         .post('/api/add/field')
-        .send({ id: null, data: { type: 'text', data: 'Hello' } })
+        .send({ id: null, data: { type: 'text', data: [{ text: 'Hello' }] } })
         .catch(err => err.response)
         .then(res => {
           expect(res).to.have.status(403);
@@ -326,7 +338,10 @@ describe('MongoService', () => {
     before(() => {
       return mongoose
         .model('Page')
-        .create({ name: 'Title', data: { type: 'text', data: 'Hello' } })
+        .create({
+          name: 'Title',
+          data: { type: 'text', data: { data: 'Hello' } }
+        })
         .then(field => {
           testField = field;
         });
@@ -341,12 +356,12 @@ describe('MongoService', () => {
           data: {
             type: testField.data[0].type,
             id: testField.data[0].id,
-            data: 'Hi'
+            data: [{ text: 'Hi' }]
           }
         })
         .then(res => {
           expect(res).to.have.status(200);
-          expect(res.body.data[0].data).to.equal('Hi');
+          expect(res.body.data).to.containSubset([{ text: 'Hi' }]);
         });
     });
 
@@ -355,7 +370,9 @@ describe('MongoService', () => {
         .model('Page')
         .findById(testField.id)
         .then(field => {
-          expect(field.data[0].data).to.equal('Hi');
+          expect(field.data).to.containSubset([
+            { type: 'text', _id: String, data: [{ text: 'Hi' }] }
+          ]);
         });
     });
 
@@ -368,7 +385,7 @@ describe('MongoService', () => {
           data: {
             type: testField.data[0].type,
             id: testField.data[0].id,
-            data: 'Hello'
+            data: [{ text: 'Hello' }]
           }
         })
         .catch(err => err.response)
@@ -387,7 +404,7 @@ describe('MongoService', () => {
           data: {
             type: testField.data[0].type,
             id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
-            data: 'Hi'
+            data: [{ text: 'Hi' }]
           }
         })
         .catch(err => err.response)
@@ -405,7 +422,7 @@ describe('MongoService', () => {
           data: {
             type: testField.data[0].type,
             id: testField.data[0].id,
-            data: 'Hello'
+            data: [{ text: 'Hello' }]
           }
         })
         .catch(err => err.response)
@@ -433,7 +450,7 @@ describe('MongoService', () => {
         .put('/api/update/field')
         .send({
           id: testField.id,
-          data: { id: testField.data[0].id, data: 'Hello' }
+          data: { id: testField.data[0].id, data: [{ text: 'Hello' }] }
         })
         .catch(err => err.response)
         .then(res => {
@@ -448,7 +465,7 @@ describe('MongoService', () => {
         .put('/api/update/field')
         .send({
           id: testField.id,
-          data: { type: testField.data[0].type, data: 'Hello' }
+          data: { type: testField.data[0].type, data: [{ text: 'Hello' }] }
         })
         .catch(err => err.response)
         .then(res => {
@@ -525,8 +542,8 @@ describe('MongoService', () => {
         .create({
           name: 'Title',
           data: [
-            { type: 'text', data: 'Hello' },
-            { type: 'text', data: 'Hello' }
+            { type: 'text', data: [{ text: 'Hello' }] },
+            { type: 'text', data: [{ text: 'Hello' }] }
           ]
         })
         .then(field => {
